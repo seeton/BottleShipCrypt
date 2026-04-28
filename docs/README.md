@@ -4,19 +4,23 @@ This directory contains the static browser demo.
 
 The demo runs entirely in the browser using Web Crypto API.
 It is a weak-model visualization of BottleShip mechanics, not the strong trusted-state model.
+It now visualizes the archive structure and state transition, not just the controls, so you can see chunk-by-chunk state change as you choose a keep set, prune, and decrypt.
 
 For the current non-browser simulator path, use the Go CLI at the repository root in [`cmd/bship/`](https://github.com/seeton/BottleShipCrypt/tree/main/cmd/bship). The [`prototype/`](https://github.com/seeton/BottleShipCrypt/tree/main/prototype) directory is reserved for future prototype notes and strong-model work only; it does not contain the current simulator implementation.
 
 ## What it demonstrates
 
-- splitting a file into chunks
+- splitting a file into chunks and showing the resulting archive layout
 - encrypting each chunk independently
-- assigning a simulated key capsule to each chunk
-- refusing decryption when the remaining archive exceeds a threshold
+- assigning a simulated key capsule to each chunk and showing whether it is still present
+- comparing the remaining archive against the threshold and refusing decryption while it stays oversized
 - selecting a keep set
 - pruning all non-selected chunks
+- showing which chunks remain available after prune and which capsules were deleted
 - decrypting only the remaining chunks
 - exporting a manifest for inspection
+
+In practice, the page lets you watch chunk rows move through available/destroyed state, see capsule present/deleted markers, and see when the remaining decryptable bytes drop below the threshold so residual decrypt becomes available.
 
 ## What it does not secure
 

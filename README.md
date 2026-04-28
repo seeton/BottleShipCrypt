@@ -8,7 +8,7 @@ An archive larger than its configured threshold cannot be decrypted as a whole. 
 
 This repository contains two distinct artifacts:
 
-- **Weak browser demo** (`docs/index.html`) — a GitHub Pages-friendly demonstration of the BottleShip state machine using browser-side cryptography and simulated capsule deletion.
+- **Weak browser demo** (`docs/index.html`) — a GitHub Pages-friendly visualization of the BottleShip archive structure and state transition using browser-side cryptography and simulated capsule deletion.
 - **Strong-model simulator / proof target** — an idealized trusted component with authenticated state, trusted key unsealing, irreversible capsule destruction, and rollback resistance. This is the only model for which BottleShip can be argued secure; see `SECURITY_PROOF.md`.
 
 Browser code, local CLI/archive code, and other logic outside the trusted component are **demonstrations or simulations** of the state machine. They are not themselves the proof target, and they do not amount to a blanket proof of browser, OS, filesystem, TEE, TPM, HSM, or hardware security.
@@ -60,6 +60,8 @@ The CLI and trusted-store path are still a **simulator**, not a real strong trus
 Open `docs/index.html` in a modern browser, or publish the `docs/` directory with GitHub Pages.
 
 The demo runs entirely in the browser with Web Crypto API and keeps simulated key capsules only in memory. It is useful for understanding the state machine, not for enforcing the strong BottleShip property.
+
+The page is more than a control surface: it visualizes the archive chunk layout, whether each simulated key capsule is present or deleted, how the remaining archive compares with the threshold, and when prune leaves a residual archive that is small enough to decrypt.
 
 ## Running the Go CLI simulator
 

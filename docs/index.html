@@ -175,6 +175,286 @@
     .muted {
       color: #4b5563;
     }
+
+    h3 {
+      margin: 0 0 0.6rem;
+      font-size: 1rem;
+    }
+
+    .visualization-stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .visual-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .visual-empty {
+      padding: 14px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 10px;
+      background: #f8fafc;
+      color: #475569;
+    }
+
+    .flow-diagram {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .flow-step {
+      padding: 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      background: #f9fafb;
+    }
+
+    .flow-step h3 {
+      margin-bottom: 0.35rem;
+    }
+
+    .step-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      margin-bottom: 8px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .step-badge-neutral,
+    .chip-neutral {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .step-badge-pending,
+    .chip-pending {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .step-badge-success,
+    .chip-success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .step-badge-danger,
+    .chip-danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .step-detail {
+      color: #1f2937;
+    }
+
+    .step-meta {
+      margin-top: 8px;
+      color: #6b7280;
+      font-size: 0.85rem;
+    }
+
+    .metric-copy {
+      margin-bottom: 10px;
+      color: #1f2937;
+    }
+
+    .meter-shell {
+      position: relative;
+      height: 24px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e5e7eb;
+    }
+
+    .meter-fill {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      border-radius: 999px;
+    }
+
+    .meter-fill-remaining {
+      background: linear-gradient(90deg, #93c5fd, #2563eb);
+    }
+
+    .meter-fill-selected {
+      z-index: 2;
+      background: linear-gradient(90deg, #86efac, #16a34a);
+    }
+
+    .threshold-marker {
+      position: absolute;
+      top: -3px;
+      bottom: -3px;
+      z-index: 3;
+      width: 3px;
+      border-radius: 999px;
+      background: #b45309;
+    }
+
+    .meter-scale {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      color: #6b7280;
+      font-size: 0.85rem;
+    }
+
+    .viz-legend,
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      margin-top: 10px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #4b5563;
+      font-size: 0.85rem;
+    }
+
+    .legend-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .swatch-remaining {
+      background: #2563eb;
+    }
+
+    .swatch-selected {
+      background: #16a34a;
+    }
+
+    .swatch-threshold {
+      background: #b45309;
+    }
+
+    .swatch-available {
+      background: #93c5fd;
+    }
+
+    .swatch-keep {
+      background: #86efac;
+    }
+
+    .swatch-decryptable {
+      background: #c4b5fd;
+    }
+
+    .swatch-pruned {
+      background: #fca5a5;
+    }
+
+    .archive-strip {
+      display: flex;
+      gap: 6px;
+      align-items: stretch;
+      min-height: 82px;
+    }
+
+    .archive-segment {
+      min-width: 58px;
+      flex-basis: 0;
+      padding: 10px 8px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .archive-segment strong {
+      font-size: 0.85rem;
+    }
+
+    .archive-segment small {
+      color: #374151;
+    }
+
+    .segment-available {
+      background: #dbeafe;
+      border-color: #93c5fd;
+    }
+
+    .segment-keep {
+      background: #dcfce7;
+      border-color: #86efac;
+    }
+
+    .segment-decryptable {
+      background: #ede9fe;
+      border-color: #c4b5fd;
+    }
+
+    .segment-pruned {
+      background: #fee2e2;
+      border-color: #fca5a5;
+    }
+
+    .chunk-visual-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .chunk-card-visual {
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 14px;
+      background: #ffffff;
+    }
+
+    .chunk-card-visual.segment-available {
+      background: #eff6ff;
+    }
+
+    .chunk-card-visual.segment-keep {
+      background: #f0fdf4;
+    }
+
+    .chunk-card-visual.segment-decryptable {
+      background: #f5f3ff;
+    }
+
+    .chunk-card-visual.segment-pruned {
+      background: #fef2f2;
+    }
+
+    .chunk-card-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: baseline;
+    }
+
+    .chunk-card-header strong {
+      font-size: 0.95rem;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -258,7 +538,34 @@
   </section>
 
   <section class="panel">
-    <h2>3. Select chunks to keep</h2>
+    <h2>3. Weak-model state visualization</h2>
+    <p class="muted">
+      Teaching view only: these chunk capsules, colors, and transitions exist only in browser memory. They illustrate the weak model; they do not provide trusted destruction or rollback resistance.
+    </p>
+    <div class="visualization-stack">
+      <div id="flowDiagram" class="flow-diagram"></div>
+      <div class="visual-grid">
+        <div>
+          <h3>Threshold vs. remaining bytes</h3>
+          <div id="thresholdSummary" class="metric-copy">Seal a file to see the threshold meter.</div>
+          <div id="thresholdMeter" class="visual-empty">No archive loaded.</div>
+        </div>
+        <div>
+          <h3>Archive byte map</h3>
+          <div id="archiveMap" class="visual-empty">Chunk layout appears after sealing.</div>
+        </div>
+      </div>
+      <div>
+        <h3>Chunk + capsule state</h3>
+        <div id="chunkVisualization" class="chunk-visual-grid">
+          <div class="visual-empty">Seal a file to inspect simulated capsules and decryptability.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>4. Select chunks to keep</h2>
     <p class="muted">
       Select the subset you want to preserve. In this weak demo, pruning deletes only the in-memory simulated key capsules for non-selected chunks.
       The strong model instead requires irreversible capsule destruction in a trusted component.
@@ -272,7 +579,7 @@
   </section>
 
   <section class="panel">
-    <h2>Manifest</h2>
+    <h2>5. Manifest</h2>
     <pre id="manifestView">{}</pre>
   </section>
 
@@ -293,6 +600,16 @@
         binary += String.fromCharCode(byte);
       }
       return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      })[character]);
     }
 
     async function sha256(buffer) {
@@ -397,6 +714,233 @@
       };
     }
 
+    function describeChunkState(chunk, decryptAllowed) {
+      if (chunk.destroyed || chunk.keyCapsule === null) {
+        return {
+          tone: "pruned",
+          chipClass: "chip-danger",
+          stage: "pruned",
+          capsule: "capsule deleted",
+          decryptability: "not decryptable",
+          summary: "Removed from the residual archive."
+        };
+      }
+
+      if (decryptAllowed) {
+        return {
+          tone: "decryptable",
+          chipClass: "chip-success",
+          stage: chunk.keep ? "kept residual" : "residual ready",
+          capsule: "capsule present",
+          decryptability: "decryptable now",
+          summary: "Below threshold, so this chunk can be decrypted."
+        };
+      }
+
+      if (chunk.keep) {
+        return {
+          tone: "keep",
+          chipClass: "chip-pending",
+          stage: "selected keep",
+          capsule: "capsule present",
+          decryptability: "blocked by threshold",
+          summary: "Chosen to survive prune, but the archive is still oversized."
+        };
+      }
+
+      return {
+        tone: "available",
+        chipClass: "chip-neutral",
+        stage: "sealed / droppable",
+        capsule: "capsule present",
+        decryptability: "blocked by threshold",
+        summary: "Still present in the oversized sealed archive."
+      };
+    }
+
+    function clampPercent(value, scale) {
+      return Math.max(0, Math.min(100, (value / scale) * 100));
+    }
+
+    function updateVisualization() {
+      const flowDiagram = document.getElementById("flowDiagram");
+      const thresholdSummary = document.getElementById("thresholdSummary");
+      const thresholdMeter = document.getElementById("thresholdMeter");
+      const archiveMap = document.getElementById("archiveMap");
+      const chunkVisualization = document.getElementById("chunkVisualization");
+
+      if (!archive) {
+        flowDiagram.innerHTML = `
+          <div class="flow-step">
+            <span class="step-badge step-badge-neutral">waiting</span>
+            <h3>1. Seal oversized archive</h3>
+            <div class="step-detail">Create a chunked archive with simulated key capsules.</div>
+            <div class="step-meta">Weak-model teaching aid only.</div>
+          </div>
+          <div class="flow-step">
+            <span class="step-badge step-badge-neutral">waiting</span>
+            <h3>2. Choose keep set</h3>
+            <div class="step-detail">Mark the chunks that should survive the prune step.</div>
+            <div class="step-meta">Selection updates the visual state immediately.</div>
+          </div>
+          <div class="flow-step">
+            <span class="step-badge step-badge-neutral">waiting</span>
+            <h3>3. Prune non-kept chunks</h3>
+            <div class="step-detail">Delete simulated capsules for non-selected chunks.</div>
+            <div class="step-meta">A strong model would need irreversible destruction.</div>
+          </div>
+          <div class="flow-step">
+            <span class="step-badge step-badge-neutral">waiting</span>
+            <h3>4. Residual decrypt</h3>
+            <div class="step-detail">Decrypt only when remaining bytes are at or below the threshold.</div>
+            <div class="step-meta">This browser page cannot enforce trusted state.</div>
+          </div>
+        `;
+        thresholdSummary.textContent = "Seal a file to see the threshold meter.";
+        thresholdMeter.className = "visual-empty";
+        thresholdMeter.textContent = "No archive loaded.";
+        archiveMap.className = "visual-empty";
+        archiveMap.textContent = "Chunk layout appears after sealing.";
+        chunkVisualization.innerHTML = `<div class="visual-empty">Seal a file to inspect simulated capsules and decryptability.</div>`;
+        return;
+      }
+
+      const currentRemainingBytes = remainingBytes();
+      const currentSelectedKeepBytes = selectedKeepBytes();
+      const decryptAllowed = currentRemainingBytes <= archive.thresholdBytes;
+      const totalChunks = archive.chunks.length;
+      const keptChunks = archive.chunks.filter((chunk) => !chunk.destroyed && chunk.keep).length;
+      const destroyedChunks = archive.chunks.filter((chunk) => chunk.destroyed).length;
+      const currentRemainingChunks = currentChunks().length;
+      const meterScale = Math.max(archive.totalBytes, archive.thresholdBytes, 1);
+      const remainingPercent = clampPercent(currentRemainingBytes, meterScale);
+      const selectedPercent = clampPercent(currentSelectedKeepBytes, meterScale);
+      const thresholdPercent = clampPercent(archive.thresholdBytes, meterScale);
+      const overThresholdBytes = Math.max(currentRemainingBytes - archive.thresholdBytes, 0);
+      const underThresholdBytes = Math.max(archive.thresholdBytes - currentRemainingBytes, 0);
+
+      let keepBadgeClass = "step-badge-neutral";
+      let keepBadgeText = "nothing selected";
+      if (currentSelectedKeepBytes > archive.thresholdBytes) {
+        keepBadgeClass = "step-badge-danger";
+        keepBadgeText = "keep set too large";
+      } else if (currentSelectedKeepBytes > 0) {
+        keepBadgeClass = "step-badge-success";
+        keepBadgeText = "keep set fits";
+      }
+
+      let pruneBadgeClass = "step-badge-neutral";
+      let pruneBadgeText = "not pruned yet";
+      if (destroyedChunks > 0) {
+        pruneBadgeClass = "step-badge-success";
+        pruneBadgeText = "capsules pruned";
+      } else if (currentSelectedKeepBytes <= archive.thresholdBytes && hasPrunableChunks()) {
+        pruneBadgeClass = "step-badge-pending";
+        pruneBadgeText = "ready to prune";
+      }
+
+      const decryptBadgeClass = decryptAllowed ? "step-badge-success" : "step-badge-danger";
+      const decryptBadgeText = archive.lastAction === "decrypted" ? "residual downloaded" : (decryptAllowed ? "decrypt allowed" : "decrypt refused");
+
+      flowDiagram.innerHTML = `
+        <div class="flow-step">
+          <span class="step-badge ${archive.totalBytes > archive.thresholdBytes ? "step-badge-danger" : "step-badge-success"}">
+            ${archive.totalBytes > archive.thresholdBytes ? "oversized" : "within threshold"}
+          </span>
+          <h3>1. Seal oversized archive</h3>
+          <div class="step-detail">${formatBytes(archive.totalBytes)} bytes sealed into ${totalChunks} chunk${totalChunks === 1 ? "" : "s"}.</div>
+          <div class="step-meta">Each chunk starts with a simulated in-memory capsule.</div>
+        </div>
+        <div class="flow-step">
+          <span class="step-badge ${keepBadgeClass}">${keepBadgeText}</span>
+          <h3>2. Choose keep set</h3>
+          <div class="step-detail">${keptChunks} chunk${keptChunks === 1 ? "" : "s"} selected to keep (${formatBytes(currentSelectedKeepBytes)} bytes).</div>
+          <div class="step-meta">Selection is only a browser-side teaching state in this demo.</div>
+        </div>
+        <div class="flow-step">
+          <span class="step-badge ${pruneBadgeClass}">${pruneBadgeText}</span>
+          <h3>3. Prune non-kept chunks</h3>
+          <div class="step-detail">${destroyedChunks} chunk${destroyedChunks === 1 ? "" : "s"} already pruned; state version ${archive.stateVersion}.</div>
+          <div class="step-meta">Prune removes simulated capsules for all non-kept chunks.</div>
+        </div>
+        <div class="flow-step">
+          <span class="step-badge ${decryptBadgeClass}">${decryptBadgeText}</span>
+          <h3>4. Residual decrypt</h3>
+          <div class="step-detail">${formatBytes(currentRemainingBytes)} bytes remain across ${currentRemainingChunks} active chunk${currentRemainingChunks === 1 ? "" : "s"}.</div>
+          <div class="step-meta">${decryptAllowed ? `Remaining bytes are ${formatBytes(underThresholdBytes)} below the threshold.` : `Remaining bytes exceed the threshold by ${formatBytes(overThresholdBytes)}.`}</div>
+        </div>
+      `;
+
+      thresholdSummary.innerHTML = decryptAllowed
+        ? `Remaining bytes are at or below the threshold in this <strong>weak-model only</strong> demo, so residual decrypt is allowed.`
+        : `Remaining bytes still exceed the threshold in this <strong>weak-model only</strong> demo, so decrypt is refused until you prune.`;
+      thresholdMeter.className = "";
+      thresholdMeter.innerHTML = `
+        <div class="meter-shell" aria-label="Remaining bytes versus threshold">
+          <div class="meter-fill meter-fill-remaining" style="width: ${remainingPercent}%;"></div>
+          <div class="meter-fill meter-fill-selected" style="width: ${selectedPercent}%;"></div>
+          <div class="threshold-marker" style="left: calc(${thresholdPercent}% - 1.5px);"></div>
+        </div>
+        <div class="meter-scale">
+          <span>0 bytes</span>
+          <span>scale: ${formatBytes(meterScale)} bytes</span>
+        </div>
+        <div class="viz-legend">
+          <span class="legend-item"><span class="legend-swatch swatch-remaining"></span>remaining archive: ${formatBytes(currentRemainingBytes)}</span>
+          <span class="legend-item"><span class="legend-swatch swatch-selected"></span>selected keep set: ${formatBytes(currentSelectedKeepBytes)}</span>
+          <span class="legend-item"><span class="legend-swatch swatch-threshold"></span>threshold: ${formatBytes(archive.thresholdBytes)}</span>
+        </div>
+      `;
+
+      if (totalChunks === 0) {
+        archiveMap.className = "visual-empty";
+        archiveMap.textContent = "This sealed archive contains no chunks.";
+        chunkVisualization.innerHTML = `<div class="visual-empty">No chunks were generated for this file.</div>`;
+        return;
+      }
+
+      archiveMap.className = "";
+      archiveMap.innerHTML = `
+        <div class="archive-strip">
+          ${archive.chunks.map((chunk) => {
+            const state = describeChunkState(chunk, decryptAllowed);
+            return `
+              <div class="archive-segment segment-${state.tone}" style="flex-grow: ${Math.max(chunk.plaintextSize, 1)};">
+                <strong>${escapeHtml(chunk.id)}</strong>
+                <small>${formatBytes(chunk.plaintextSize)} bytes</small>
+                <small>${escapeHtml(state.stage)}</small>
+              </div>
+            `;
+          }).join("")}
+        </div>
+        <div class="viz-legend">
+          <span class="legend-item"><span class="legend-swatch swatch-available"></span>sealed / removable</span>
+          <span class="legend-item"><span class="legend-swatch swatch-keep"></span>selected keep</span>
+          <span class="legend-item"><span class="legend-swatch swatch-decryptable"></span>residual decryptable</span>
+          <span class="legend-item"><span class="legend-swatch swatch-pruned"></span>pruned capsule</span>
+        </div>
+      `;
+
+      chunkVisualization.innerHTML = archive.chunks.map((chunk) => {
+        const state = describeChunkState(chunk, decryptAllowed);
+        return `
+          <div class="chunk-card-visual segment-${state.tone}">
+            <div class="chunk-card-header">
+              <strong>Chunk ${escapeHtml(chunk.id)}</strong>
+              <span class="chip ${state.chipClass}">${escapeHtml(state.stage)}</span>
+            </div>
+            <p class="muted">${formatBytes(chunk.plaintextSize)} bytes · hash ${escapeHtml(chunk.ciphertextHash.slice(0, 16))}…</p>
+            <div class="chip-row">
+              <span class="chip ${chunk.keyCapsule === null ? "chip-danger" : "chip-neutral"}">${chunk.keyCapsule === null ? "capsule deleted" : "capsule present"}</span>
+              <span class="chip ${chunk.keep ? "chip-pending" : "chip-neutral"}">${chunk.keep ? "keep selected" : "not selected"}</span>
+              <span class="chip ${chunk.destroyed ? "chip-danger" : (decryptAllowed ? "chip-success" : "chip-pending")}">${escapeHtml(state.decryptability)}</span>
+            </div>
+            <p class="muted">${escapeHtml(state.summary)}</p>
+          </div>
+        `;
+      }).join("");
+    }
+
     function downloadBlob(blob, filename) {
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
@@ -422,7 +966,7 @@
         <div class="status-grid">
           <div class="status-card">
             <strong>Input file</strong>
-            <span>${archive.inputName}</span>
+            <span>${escapeHtml(archive.inputName)}</span>
           </div>
           <div class="status-card">
             <strong>Total original bytes</strong>
@@ -462,6 +1006,11 @@
 
       chunksElement.innerHTML = "";
 
+      if (archive.chunks.length === 0) {
+        chunksElement.textContent = "No chunks available.";
+        return;
+      }
+
       for (const chunk of archive.chunks) {
         const row = document.createElement("div");
         row.className = "chunk";
@@ -472,6 +1021,7 @@
         checkbox.disabled = chunk.destroyed;
         checkbox.addEventListener("change", () => {
           chunk.keep = checkbox.checked;
+          archive.lastAction = "selected";
           updateUi();
         });
 
@@ -519,6 +1069,7 @@
 
     function updateUi() {
       updateStatus();
+      updateVisualization();
       updateChunks();
       updateButtons();
       updateManifestView();
@@ -574,6 +1125,7 @@
         chunkSizeBytes,
         totalBytes: fileBytes.byteLength,
         stateVersion: 0,
+        lastAction: "sealed",
         chunks
       };
 
@@ -602,6 +1154,7 @@
       }
 
       archive.stateVersion += 1;
+      archive.lastAction = "pruned";
       updateUi();
     }
 
@@ -643,6 +1196,8 @@
 
       const filename = archive.inputName.replace(/(\.[^.]+)?$/, "-residual$1");
       downloadBlob(new Blob([merged], { type: "application/octet-stream" }), filename);
+      archive.lastAction = "decrypted";
+      updateUi();
     }
 
     function exportManifest() {
