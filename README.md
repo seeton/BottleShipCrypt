@@ -23,15 +23,23 @@ Ordinary filesystems, browser storage, GitHub Pages hosting, and modifiable loca
 - `SECURITY_PROOF.md` — strong-model security argument for the idealized trusted component
 - `FAQ.md` — positioning and common questions
 - `TODO.md` — roadmap
+- root Go package — `.bship` archive prototype, CLI logic, and local trusted-store simulator
+- `cmd/bship/` — Go CLI entrypoint for `seal`, `inspect`, `prune`, and `decrypt`
 - `docs/` — weak browser demo for GitHub Pages
-- `prototype/` — future archive, CLI, and trusted-state simulator work
-- `test-vectors/` — future deterministic vectors for weak and strong-model behavior
+- `prototype/` — reserved future workspace; the current Go prototype lives at the repository root
+- `test-vectors/` — reserved future deterministic vectors; no formal fixtures are shipped yet
 
-## Current milestone
+## Current state
 
-The implemented milestone is the weak browser demo in `docs/index.html`.
+Implemented today:
 
-It shows the state transition:
+- weak browser demo in `docs/index.html`
+- Go `.bship` archive and CLI prototype with `seal`, `inspect`, `prune`, and `decrypt`
+- local trusted-store simulator for the simulated-strong path
+- tests covering threshold refusal, destroyed capsules, weak copy-before-prune, and simulated rollback rejection
+- `SECURITY_PROOF.md` for the idealized strong trusted-state model
+
+Across the demo and simulator, the core state transition is:
 
 ```text
 sealed oversized archive
@@ -45,13 +53,23 @@ destructive prune
 residual decrypt
 ```
 
-The next research milestone is a **strong-model simulator** that keeps the authoritative root, version, and key-unsealing authority inside a modeled trusted component. That simulator is the intended implementation target for the argument in `SECURITY_PROOF.md`.
+The CLI and trusted-store path are still a **simulator**, not a real strong trusted component. They model authenticated state, versioning, and rollback checks for local experimentation, but they do not by themselves provide the strong-model security argued in `SECURITY_PROOF.md`.
 
 ## Running the demo
 
 Open `docs/index.html` in a modern browser, or publish the `docs/` directory with GitHub Pages.
 
 The demo runs entirely in the browser with Web Crypto API and keeps simulated key capsules only in memory. It is useful for understanding the state machine, not for enforcing the strong BottleShip property.
+
+## Running the Go CLI simulator
+
+Run:
+
+```text
+go run ./cmd/bship help
+```
+
+Use weak mode for archive-only behavior, or `--mode simulated-strong --trusted-store <path>` for the local trusted-store simulator. This remains a local simulator, not production security.
 
 ## License
 

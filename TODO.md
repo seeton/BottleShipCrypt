@@ -32,41 +32,43 @@
 
 ## Phase 2: Archive format prototype
 
-- [ ] Define `.bship` archive layout
+- [x] Define `.bship` archive layout
 - [ ] Support ZIP-like export or directory export
-- [ ] Store `manifest.json`
-- [ ] Store encrypted chunks
-- [ ] Store simulated key capsules
-- [ ] Store simulated state
-- [ ] Add archive import
-- [ ] Add archive inspect
-- [ ] Add prune after import
-- [ ] Add decrypt after import
+- [x] Store manifest JSON
+- [x] Store encrypted chunks
+- [x] Store simulated key capsules
+- [x] Store simulated state
+- [x] Add archive import
+- [x] Add archive inspect
+- [x] Add prune after import
+- [x] Add decrypt after import
 
 ## Phase 3: CLI prototype
 
-- [ ] Choose language: Rust, Go, or Python
-- [ ] Implement `bship seal`
-- [ ] Implement `bship inspect`
-- [ ] Implement `bship prune`
-- [ ] Implement `bship decrypt`
+- [x] Choose language: Rust, Go, or Python
+- [x] Implement `bship seal`
+- [x] Implement `bship inspect`
+- [x] Implement `bship prune`
+- [x] Implement `bship decrypt`
 - [ ] Add test vectors
 - [ ] Add deterministic test mode
 - [ ] Add corrupted manifest tests
-- [ ] Add destroyed capsule tests
-- [ ] Add threshold refusal tests
-- [ ] Add rollback simulation tests
+- [x] Add destroyed capsule tests
+- [x] Add threshold refusal tests
+- [x] Add rollback simulation tests
 
 ## Phase 4: Strong-model simulation
 
-- [ ] Implement local trusted-state simulator
-- [ ] Add state version
-- [ ] Add current root
-- [ ] Reject old roots
-- [ ] Simulate monotonic counter
-- [ ] Add attack demo: copy-before-prune succeeds in weak model
-- [ ] Add attack demo: rollback rejected in simulated strong model
-- [ ] Document why simulation is not production security
+Current items here refer to the local trusted-store simulator, not a real trusted component.
+
+- [x] Implement local trusted-state simulator
+- [x] Add state version
+- [x] Add current root
+- [x] Reject old roots
+- [x] Simulate monotonic counter
+- [x] Add attack demo: copy-before-prune succeeds in weak model
+- [x] Add attack demo: rollback rejected in simulated strong model
+- [x] Document why simulation is not production security
 
 ## Phase 5: Real trusted component exploration
 
@@ -86,7 +88,7 @@
 - [ ] Add diagrams
 - [ ] Add glossary
 - [ ] Add examples
-- [ ] Add FAQ
+- [x] Add FAQ
 - [ ] Add "Why not normal encryption?"
 - [ ] Add "Why not secure deletion?"
 - [ ] Add "Why not access control?"

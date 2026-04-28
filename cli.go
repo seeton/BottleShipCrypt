@@ -8,6 +8,12 @@ import (
 	"strings"
 )
 
+const (
+	simulatedStrongMode  Mode = "simulated-strong"
+	modeFlagHelp              = "mode to use: weak (default) or simulated-strong; \"strong\" remains a compatibility alias for the simulator-backed mode"
+	trustedStoreFlagHelp      = "path to local JSON trusted-store simulator state for simulated-strong/strong; this file is demo/test state, not a secure trusted component"
+)
+
 func RunCLI(args []string, stdout, stderr io.Writer) int {
 	if len(args) == 0 {
 		printUsage(stderr)
@@ -34,15 +40,22 @@ func RunCLI(args []string, stdout, stderr io.Writer) int {
 }
 
 func runSeal(args []string, stdout, stderr io.Writer) int {
-	fs := flag.NewFlagSet("seal", flag.ContinueOnError)
-	fs.SetOutput(stderr)
+	fs := newCommandFlagSet("seal", "Seal a file into a BottleShip archive.", stderr)
 	inPath := fs.String("in", "", "input file to seal")
 	outPath := fs.String("out", "", "output .bship archive")
 	threshold := fs.Int64("threshold", 0, "maximum decryptable plaintext bytes")
 	chunkSize := fs.Int("chunk-size", 1024, "plaintext chunk size in bytes")
-	modeValue := fs.String("mode", string(WeakMode), "weak or strong")
-	storePath := fs.String("trusted-store", "", "trusted store path for strong mode")
+	modeValue := fs.String("mode", string(WeakMode), modeFlagHelp)
+	storePath := fs.String("trusted-store", "", trustedStoreFlagHelp)
 	if err := fs.Parse(args); err != nil {
+		if err == flag.ErrHelp {
+			return 0
+		}
+		return 2
+	}
+	mode, err := parseCLIMode(*modeValue)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
 		return 2
 	}
 
@@ -51,7 +64,7 @@ func runSeal(args []string, stdout, stderr io.Writer) int {
 		ArchivePath:      *outPath,
 		ThresholdBytes:   *threshold,
 		ChunkSizeBytes:   *chunkSize,
-		Mode:             Mode(*modeValue),
+		Mode:             mode,
 		TrustedStorePath: *storePath,
 	})
 	if err != nil {
@@ -63,17 +76,24 @@ func runSeal(args []string, stdout, stderr io.Writer) int {
 }
 
 func runInspect(args []string, stdout, stderr io.Writer) int {
-	fs := flag.NewFlagSet("inspect", flag.ContinueOnError)
-	fs.SetOutput(stderr)
+	fs := newCommandFlagSet("inspect", "Inspect archive state without decrypting.", stderr)
 	archivePath := fs.String("archive", "", "archive to inspect")
-	modeValue := fs.String("mode", string(WeakMode), "weak or strong")
-	storePath := fs.String("trusted-store", "", "trusted store path for strong mode")
+	modeValue := fs.String("mode", string(WeakMode), modeFlagHelp)
+	storePath := fs.String("trusted-store", "", trustedStoreFlagHelp)
 	if err := fs.Parse(args); err != nil {
+		if err == flag.ErrHelp {
+			return 0
+		}
+		return 2
+	}
+	mode, err := parseCLIMode(*modeValue)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
 		return 2
 	}
 	inspection, err := InspectArchive(InspectOptions{
 		ArchivePath:      *archivePath,
-		Mode:             Mode(*modeValue),
+		Mode:             mode,
 		TrustedStorePath: *storePath,
 	})
 	if err != nil {
@@ -90,20 +110,27 @@ func runInspect(args []string, stdout, stderr io.Writer) int {
 }
 
 func runPrune(args []string, stdout, stderr io.Writer) int {
-	fs := flag.NewFlagSet("prune", flag.ContinueOnError)
-	fs.SetOutput(stderr)
+	fs := newCommandFlagSet("prune", "Destroy selected chunk capsules to reduce decryptable plaintext.", stderr)
 	archivePath := fs.String("archive", "", "archive to prune")
 	keepValue := fs.String("keep", "", "comma-separated chunk IDs or indices to keep")
-	modeValue := fs.String("mode", string(WeakMode), "weak or strong")
-	storePath := fs.String("trusted-store", "", "trusted store path for strong mode")
+	modeValue := fs.String("mode", string(WeakMode), modeFlagHelp)
+	storePath := fs.String("trusted-store", "", trustedStoreFlagHelp)
 	if err := fs.Parse(args); err != nil {
+		if err == flag.ErrHelp {
+			return 0
+		}
+		return 2
+	}
+	mode, err := parseCLIMode(*modeValue)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
 		return 2
 	}
 
 	archive, err := PruneArchive(PruneOptions{
 		ArchivePath:      *archivePath,
 		Keep:             splitCSV(*keepValue),
-		Mode:             Mode(*modeValue),
+		Mode:             mode,
 		TrustedStorePath: *storePath,
 	})
 	if err != nil {
@@ -115,20 +142,27 @@ func runPrune(args []string, stdout, stderr io.Writer) int {
 }
 
 func runDecrypt(args []string, stdout, stderr io.Writer) int {
-	fs := flag.NewFlagSet("decrypt", flag.ContinueOnError)
-	fs.SetOutput(stderr)
+	fs := newCommandFlagSet("decrypt", "Decrypt the currently recoverable plaintext.", stderr)
 	archivePath := fs.String("archive", "", "archive to decrypt")
 	outPath := fs.String("out", "", "output file for remaining plaintext")
-	modeValue := fs.String("mode", string(WeakMode), "weak or strong")
-	storePath := fs.String("trusted-store", "", "trusted store path for strong mode")
+	modeValue := fs.String("mode", string(WeakMode), modeFlagHelp)
+	storePath := fs.String("trusted-store", "", trustedStoreFlagHelp)
 	if err := fs.Parse(args); err != nil {
+		if err == flag.ErrHelp {
+			return 0
+		}
+		return 2
+	}
+	mode, err := parseCLIMode(*modeValue)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
 		return 2
 	}
 
 	plaintext, err := DecryptArchive(DecryptOptions{
 		ArchivePath:      *archivePath,
 		OutputPath:       *outPath,
-		Mode:             Mode(*modeValue),
+		Mode:             mode,
 		TrustedStorePath: *storePath,
 	})
 	if err != nil {
@@ -141,6 +175,43 @@ func runDecrypt(args []string, stdout, stderr io.Writer) int {
 
 func printUsage(w io.Writer) {
 	fmt.Fprintln(w, "usage: bship <seal|inspect|prune|decrypt> [flags]")
+	fmt.Fprintln(w)
+	fmt.Fprintln(w, "Modes:")
+	fmt.Fprintf(w, "  %s              archive carries all decryption material in the archive itself.\n", WeakMode)
+	fmt.Fprintf(w, "  %s  local JSON trusted-store simulator; %q is accepted as a compatibility alias.\n", simulatedStrongMode, StrongMode)
+	fmt.Fprintln(w, "                     This simulator state is not a secure trusted component or strong-model security boundary.")
+	fmt.Fprintln(w)
+	fmt.Fprintln(w, `Use "bship <command> -h" for command-specific flags.`)
+}
+
+func newCommandFlagSet(name, description string, stderr io.Writer) *flag.FlagSet {
+	fs := flag.NewFlagSet(name, flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	fs.Usage = func() {
+		fmt.Fprintf(stderr, "usage: bship %s [flags]\n", name)
+		if description != "" {
+			fmt.Fprintln(stderr, description)
+		}
+		fmt.Fprintln(stderr)
+		fs.PrintDefaults()
+		fmt.Fprintln(stderr)
+		fmt.Fprintln(stderr, "Mode notes:")
+		fmt.Fprintf(stderr, "  %s              archive-only state; copying old archives can bypass pruning.\n", WeakMode)
+		fmt.Fprintf(stderr, "  %s  local JSON trusted-store simulator; %q stays supported as an alias.\n", simulatedStrongMode, StrongMode)
+		fmt.Fprintln(stderr, "                     The trusted-store file is only local simulator state, not secure hardware or a trusted component.")
+	}
+	return fs
+}
+
+func parseCLIMode(value string) (Mode, error) {
+	switch strings.TrimSpace(strings.ToLower(value)) {
+	case "", string(WeakMode):
+		return WeakMode, nil
+	case string(StrongMode), string(simulatedStrongMode):
+		return StrongMode, nil
+	default:
+		return "", fmt.Errorf("unsupported mode %q (use %q or %q; %q remains a compatibility alias for the trusted-store simulator)", value, WeakMode, simulatedStrongMode, StrongMode)
+	}
 }
 
 func splitCSV(value string) []string {

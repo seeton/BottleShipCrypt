@@ -5,7 +5,7 @@ This directory contains the static browser demo.
 The demo runs entirely in the browser using Web Crypto API.
 It is a weak-model visualization of BottleShip mechanics, not the strong trusted-state model.
 
-For the strong-model path, use the trusted-state simulator work in [`prototype/`](https://github.com/seeton/BottleShipCrypt/tree/main/prototype).
+The current non-browser BottleShip code lives at the repository root via the Go CLI in [`cmd/bship/`](https://github.com/seeton/BottleShipCrypt/tree/main/cmd/bship). The [`prototype/`](https://github.com/seeton/BottleShipCrypt/tree/main/prototype) directory is reserved for future prototype notes and strong-model work; it does not contain the current simulator implementation.
 
 ## What it demonstrates
 
@@ -43,4 +43,4 @@ Destruction is simulated.
 - capsule destruction must be irreversible when pruning
 - this is the path relevant to real security claims
 
-A real implementation requires trusted hardware or a trusted service with rollback-resistant state and irreversible capsule destruction.
+A real strong-model implementation requires trusted hardware or a trusted service with rollback-resistant state and irreversible capsule destruction. The current local CLI/archive experiments are separate Go code at the repository root, while `prototype/` remains future work.
