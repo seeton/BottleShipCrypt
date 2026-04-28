@@ -1,0 +1,11 @@
+{
+  "format": "bship-trusted-store-v1",
+  "archives": [
+    {
+      "archive_id": "simulated-strong-vector",
+      "version": 1,
+      "root": "TEotmtaPiyu9ZcFK3IMJKcbBchKrqAO18Q4ATy0ZBEs",
+      "wrap_key_b64": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8"
+    }
+  ]
+}

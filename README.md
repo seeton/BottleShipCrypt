@@ -71,6 +71,39 @@ go run ./cmd/bship help
 
 Use weak mode for archive-only behavior, or `--mode simulated-strong --trusted-store <path>` for the local trusted-store simulator. The older `--mode strong` spelling is still accepted as a compatibility alias, but `simulated-strong` is the preferred name. This remains a local simulator, not production security.
 
+Example simulator sequence:
+
+```text
+mkdir -p example && printf 'abcdefgh' > example/plaintext.bin
+
+go run ./cmd/bship seal \
+  --in example/plaintext.bin \
+  --out example/sample.bship \
+  --threshold 4 \
+  --chunk-size 4 \
+  --mode simulated-strong \
+  --trusted-store example/trusted-store.json
+
+go run ./cmd/bship inspect \
+  --archive example/sample.bship \
+  --mode simulated-strong \
+  --trusted-store example/trusted-store.json
+
+go run ./cmd/bship prune \
+  --archive example/sample.bship \
+  --keep 0 \
+  --mode simulated-strong \
+  --trusted-store example/trusted-store.json
+
+go run ./cmd/bship decrypt \
+  --archive example/sample.bship \
+  --out example/recovered.bin \
+  --mode simulated-strong \
+  --trusted-store example/trusted-store.json
+```
+
+With the `4`-byte threshold and `4`-byte chunk size above, the archive starts oversized, `prune --keep 0` keeps only the first chunk, and `decrypt` writes the remaining plaintext (`abcd`) to `example/recovered.bin`.
+
 ## License
 
 Apache-2.0.
