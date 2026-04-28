@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>BottleShip Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      max-width: 980px;
+      margin: 40px auto;
+      padding: 0 20px 48px;
+      line-height: 1.5;
+      color: #111827;
+      background: #f9fafb;
+    }
+
+    h1, h2 {
+      line-height: 1.2;
+    }
+
+    p {
+      margin: 0.5rem 0 1rem;
+    }
+
+    .panel {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 18px;
+      margin: 18px 0;
+      box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+    }
+
+    .warning {
+      border-color: #b45309;
+      background: #fffbeb;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    input[type="file"],
+    input[type="number"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 12px;
+      font: inherit;
+      border: 1px solid #9ca3af;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button {
+      padding: 10px 14px;
+      font: inherit;
+      border: 1px solid #1f2937;
+      border-radius: 8px;
+      background: #111827;
+      color: #ffffff;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #ffffff;
+      color: #111827;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    .chunk {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .chunk:last-child {
+      border-bottom: 0;
+    }
+
+    .status-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .status-card {
+      padding: 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      background: #f9fafb;
+    }
+
+    .status-card strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .allowed {
+      color: #166534;
+      font-weight: 700;
+    }
+
+    .refused {
+      color: #991b1b;
+      font-weight: 700;
+    }
+
+    pre {
+      margin: 0;
+      padding: 16px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      border-radius: 10px;
+      background: #111827;
+      color: #f9fafb;
+    }
+
+    code {
+      background: #e5e7eb;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    .muted {
+      color: #4b5563;
+    }
+  </style>
+</head>
+<body>
+  <h1>BottleShip Demo</h1>
+  <p>
+    This page demonstrates the mechanics of capacity-bounded destructive residual decryption in a browser.
+    It is an educational prototype only.
+  </p>
+
+  <section class="panel warning">
+    <strong>Research prototype only.</strong>
+    <p>
+      This demo does not provide real irreversible destruction, rollback resistance, or copy resistance.
+      Key capsules are simulated in memory and the archive state can be copied or modified by the user.
+    </p>
+  </section>
+
+  <section class="panel">
+    <h2>1. Seal file</h2>
+    <div class="grid">
+      <div>
+        <label for="fileInput">Input file</label>
+        <input id="fileInput" type="file">
+      </div>
+      <div>
+        <label for="thresholdInput">Threshold bytes</label>
+        <input id="thresholdInput" type="number" value="1048576" min="1" step="1">
+      </div>
+      <div>
+        <label for="chunkSizeInput">Chunk size bytes</label>
+        <input id="chunkSizeInput" type="number" value="262144" min="1024" step="1">
+      </div>
+    </div>
+    <div class="button-row">
+      <button id="sealButton">Seal</button>
+      <button id="resetButton" class="secondary">Reset demo</button>
+    </div>
+    <p class="muted">
+      If the remaining decryptable bytes exceed the threshold, decryption is refused until you prune to a smaller keep set.
+    </p>
+  </section>
+
+  <section class="panel">
+    <h2>2. Archive status</h2>
+    <div id="status">No archive sealed.</div>
+  </section>
+
+  <section class="panel">
+    <h2>3. Select chunks to keep</h2>
+    <p class="muted">
+      Select the subset you want to preserve. Pruning deletes the in-memory key capsules for all non-selected chunks.
+    </p>
+    <div id="chunks">No chunks available.</div>
+    <div class="button-row">
+      <button id="pruneButton" disabled>Prune non-selected chunks</button>
+      <button id="decryptButton" disabled>Decrypt remaining chunks</button>
+      <button id="manifestButton" class="secondary" disabled>Export manifest JSON</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Manifest</h2>
+    <pre id="manifestView">{}</pre>
+  </section>
+
+  <script>
+    const encoder = new TextEncoder();
+    const formatName = "bottleship-demo-v0";
+    let archive = null;
+
+    function randomBytes(length) {
+      const bytes = new Uint8Array(length);
+      crypto.getRandomValues(bytes);
+      return bytes;
+    }
+
+    function base64url(bytes) {
+      let binary = "";
+      for (const byte of bytes) {
+        binary += String.fromCharCode(byte);
+      }
+      return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+    }
+
+    async function sha256(buffer) {
+      const digest = await crypto.subtle.digest("SHA-256", buffer);
+      return base64url(new Uint8Array(digest));
+    }
+
+    async function importAesKey(rawKey) {
+      return crypto.subtle.importKey(
+        "raw",
+        rawKey,
+        { name: "AES-GCM" },
+        false,
+        ["encrypt", "decrypt"]
+      );
+    }
+
+    function makeChunkAad(chunkId, plaintextSize) {
+      return encoder.encode(`${formatName}:${chunkId}:${plaintextSize}`);
+    }
+
+    async function encryptChunk(plaintext, keyBytes, chunkId) {
+      const key = await importAesKey(keyBytes);
+      const iv = randomBytes(12);
+      const ciphertext = await crypto.subtle.encrypt(
+        { name: "AES-GCM", iv, additionalData: makeChunkAad(chunkId, plaintext.length) },
+        key,
+        plaintext
+      );
+      return {
+        iv,
+        ciphertext: new Uint8Array(ciphertext)
+      };
+    }
+
+    async function decryptChunk(ciphertext, keyBytes, iv, chunkId, plaintextSize) {
+      const key = await importAesKey(keyBytes);
+      const plaintext = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv, additionalData: makeChunkAad(chunkId, plaintextSize) },
+        key,
+        ciphertext
+      );
+      return new Uint8Array(plaintext);
+    }
+
+    function formatBytes(value) {
+      return new Intl.NumberFormat("en-US").format(value);
+    }
+
+    function currentChunks() {
+      return archive ? archive.chunks.filter((chunk) => !chunk.destroyed) : [];
+    }
+
+    function hasPrunableChunks() {
+      return archive ? archive.chunks.some((chunk) => !chunk.destroyed && !chunk.keep) : false;
+    }
+
+    function remainingBytes() {
+      return currentChunks().reduce((sum, chunk) => sum + chunk.plaintextSize, 0);
+    }
+
+    function selectedKeepBytes() {
+      if (!archive) {
+        return 0;
+      }
+      return archive.chunks
+        .filter((chunk) => !chunk.destroyed && chunk.keep)
+        .reduce((sum, chunk) => sum + chunk.plaintextSize, 0);
+    }
+
+    function buildManifest() {
+      if (!archive) {
+        return {};
+      }
+
+      return {
+        format: formatName,
+        warning: "Browser demo only. Not a secure implementation.",
+        archiveId: archive.archiveId,
+        inputName: archive.inputName,
+        createdAt: archive.createdAt,
+        thresholdBytes: archive.thresholdBytes,
+        chunkSizeBytes: archive.chunkSizeBytes,
+        totalBytes: archive.totalBytes,
+        remainingBytes: remainingBytes(),
+        stateVersion: archive.stateVersion,
+        decryptAllowed: remainingBytes() <= archive.thresholdBytes,
+        crypto: {
+          aead: "AES-GCM-256",
+          hash: "SHA-256"
+        },
+        chunks: archive.chunks.map((chunk) => ({
+          id: chunk.id,
+          index: chunk.index,
+          plaintextSize: chunk.plaintextSize,
+          ciphertextSize: chunk.ciphertext.byteLength,
+          ciphertextHash: chunk.ciphertextHash,
+          capsulePresent: chunk.keyCapsule !== null,
+          destroyed: chunk.destroyed,
+          keep: chunk.keep
+        }))
+      };
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filename;
+      anchor.click();
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+    }
+
+    function updateStatus() {
+      const status = document.getElementById("status");
+
+      if (!archive) {
+        status.textContent = "No archive sealed.";
+        return;
+      }
+
+      const currentRemainingBytes = remainingBytes();
+      const currentSelectedKeepBytes = selectedKeepBytes();
+      const decryptAllowed = currentRemainingBytes <= archive.thresholdBytes;
+
+      status.innerHTML = `
+        <div class="status-grid">
+          <div class="status-card">
+            <strong>Input file</strong>
+            <span>${archive.inputName}</span>
+          </div>
+          <div class="status-card">
+            <strong>Total original bytes</strong>
+            <span>${formatBytes(archive.totalBytes)}</span>
+          </div>
+          <div class="status-card">
+            <strong>Remaining bytes</strong>
+            <span>${formatBytes(currentRemainingBytes)}</span>
+          </div>
+          <div class="status-card">
+            <strong>Selected keep bytes</strong>
+            <span>${formatBytes(currentSelectedKeepBytes)}</span>
+          </div>
+          <div class="status-card">
+            <strong>Threshold bytes</strong>
+            <span>${formatBytes(archive.thresholdBytes)}</span>
+          </div>
+          <div class="status-card">
+            <strong>State version</strong>
+            <span>${archive.stateVersion}</span>
+          </div>
+          <div class="status-card">
+            <strong>Decrypt status</strong>
+            <span class="${decryptAllowed ? "allowed" : "refused"}">${decryptAllowed ? "allowed" : "refused"}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function updateChunks() {
+      const chunksElement = document.getElementById("chunks");
+
+      if (!archive) {
+        chunksElement.textContent = "No chunks available.";
+        return;
+      }
+
+      chunksElement.innerHTML = "";
+
+      for (const chunk of archive.chunks) {
+        const row = document.createElement("div");
+        row.className = "chunk";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = chunk.keep;
+        checkbox.disabled = chunk.destroyed;
+        checkbox.addEventListener("change", () => {
+          chunk.keep = checkbox.checked;
+          updateUi();
+        });
+
+        const label = document.createElement("div");
+        label.innerHTML = `
+          <strong>${chunk.id}</strong>
+          <div class="muted">
+            ${formatBytes(chunk.plaintextSize)} bytes ·
+            ${chunk.destroyed ? "destroyed" : "available"} ·
+            capsule ${chunk.keyCapsule === null ? "deleted" : "present"}
+          </div>
+        `;
+
+        row.appendChild(checkbox);
+        row.appendChild(label);
+        chunksElement.appendChild(row);
+      }
+    }
+
+    function updateButtons() {
+      const pruneButton = document.getElementById("pruneButton");
+      const decryptButton = document.getElementById("decryptButton");
+      const manifestButton = document.getElementById("manifestButton");
+
+      if (!archive) {
+        pruneButton.disabled = true;
+        decryptButton.disabled = true;
+        manifestButton.disabled = true;
+        return;
+      }
+
+      const currentRemainingBytes = remainingBytes();
+      const currentSelectedKeepBytes = selectedKeepBytes();
+      pruneButton.disabled =
+        currentSelectedKeepBytes > archive.thresholdBytes ||
+        currentChunks().length === 0 ||
+        !hasPrunableChunks();
+      decryptButton.disabled = currentRemainingBytes > archive.thresholdBytes;
+      manifestButton.disabled = false;
+    }
+
+    function updateManifestView() {
+      document.getElementById("manifestView").textContent = JSON.stringify(buildManifest(), null, 2);
+    }
+
+    function updateUi() {
+      updateStatus();
+      updateChunks();
+      updateButtons();
+      updateManifestView();
+    }
+
+    async function sealArchive() {
+      const fileInput = document.getElementById("fileInput");
+      const thresholdInput = document.getElementById("thresholdInput");
+      const chunkSizeInput = document.getElementById("chunkSizeInput");
+
+      const file = fileInput.files[0];
+      const thresholdBytes = Number(thresholdInput.value);
+      const chunkSizeBytes = Number(chunkSizeInput.value);
+
+      if (!file) {
+        throw new Error("Choose a file first.");
+      }
+      if (!Number.isFinite(thresholdBytes) || thresholdBytes <= 0) {
+        throw new Error("Threshold must be a positive integer.");
+      }
+      if (!Number.isFinite(chunkSizeBytes) || chunkSizeBytes < 1024) {
+        throw new Error("Chunk size must be at least 1024 bytes.");
+      }
+
+      const fileBytes = new Uint8Array(await file.arrayBuffer());
+      const chunks = [];
+
+      for (let offset = 0, index = 0; offset < fileBytes.length; offset += chunkSizeBytes, index += 1) {
+        const chunkId = String(index).padStart(8, "0");
+        const plaintext = fileBytes.slice(offset, Math.min(offset + chunkSizeBytes, fileBytes.length));
+        const keyBytes = randomBytes(32);
+        const encrypted = await encryptChunk(plaintext, keyBytes, chunkId);
+        const ciphertextHash = await sha256(encrypted.ciphertext);
+
+        chunks.push({
+          id: chunkId,
+          index,
+          plaintextSize: plaintext.byteLength,
+          iv: encrypted.iv,
+          ciphertext: encrypted.ciphertext,
+          ciphertextHash,
+          keyCapsule: keyBytes,
+          destroyed: false,
+          keep: false
+        });
+      }
+
+      archive = {
+        archiveId: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+        inputName: file.name,
+        thresholdBytes,
+        chunkSizeBytes,
+        totalBytes: fileBytes.byteLength,
+        stateVersion: 0,
+        chunks
+      };
+
+      updateUi();
+    }
+
+    function pruneArchive() {
+      if (!archive) {
+        throw new Error("No archive is loaded.");
+      }
+
+      const keepBytes = selectedKeepBytes();
+      if (keepBytes > archive.thresholdBytes) {
+        throw new Error("Keep set exceeds the threshold.");
+      }
+
+      for (const chunk of archive.chunks) {
+        if (chunk.destroyed) {
+          continue;
+        }
+        if (!chunk.keep) {
+          chunk.keyCapsule = null;
+          chunk.destroyed = true;
+          chunk.keep = false;
+        }
+      }
+
+      archive.stateVersion += 1;
+      updateUi();
+    }
+
+    async function decryptRemaining() {
+      if (!archive) {
+        throw new Error("No archive is loaded.");
+      }
+
+      const currentRemainingChunks = currentChunks();
+      const currentRemainingBytes = remainingBytes();
+
+      if (currentRemainingBytes > archive.thresholdBytes) {
+        throw new Error("Remaining archive exceeds the threshold. Decryption refused.");
+      }
+
+      const plaintextChunks = [];
+      for (const chunk of currentRemainingChunks) {
+        if (chunk.keyCapsule === null) {
+          throw new Error(`Missing key capsule for chunk ${chunk.id}.`);
+        }
+        const plaintext = await decryptChunk(
+          chunk.ciphertext,
+          chunk.keyCapsule,
+          chunk.iv,
+          chunk.id,
+          chunk.plaintextSize
+        );
+        plaintextChunks.push(plaintext);
+      }
+
+      const totalBytes = plaintextChunks.reduce((sum, chunk) => sum + chunk.byteLength, 0);
+      const merged = new Uint8Array(totalBytes);
+      let offset = 0;
+
+      for (const chunk of plaintextChunks) {
+        merged.set(chunk, offset);
+        offset += chunk.byteLength;
+      }
+
+      const filename = archive.inputName.replace(/(\.[^.]+)?$/, "-residual$1");
+      downloadBlob(new Blob([merged], { type: "application/octet-stream" }), filename);
+    }
+
+    function exportManifest() {
+      if (!archive) {
+        throw new Error("No archive is loaded.");
+      }
+      const manifestText = JSON.stringify(buildManifest(), null, 2);
+      downloadBlob(new Blob([manifestText], { type: "application/json" }), "bottleship-manifest.json");
+    }
+
+    function resetDemo() {
+      archive = null;
+      document.getElementById("fileInput").value = "";
+      updateUi();
+    }
+
+    document.getElementById("sealButton").addEventListener("click", async () => {
+      try {
+        await sealArchive();
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    document.getElementById("pruneButton").addEventListener("click", () => {
+      try {
+        pruneArchive();
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    document.getElementById("decryptButton").addEventListener("click", async () => {
+      try {
+        await decryptRemaining();
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    document.getElementById("manifestButton").addEventListener("click", () => {
+      try {
+        exportManifest();
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    document.getElementById("resetButton").addEventListener("click", () => {
+      resetDemo();
+    });
+
+    updateUi();
+  </script>
+</body>
+</html>
