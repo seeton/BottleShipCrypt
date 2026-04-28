@@ -43,17 +43,25 @@ This directory also ships **prototype / simulator fixtures** for the current JSO
   - deterministic weak-mode archive before prune
   - deterministic weak-mode archive after pruning to one chunk
   - expected inspect outputs and residual plaintext
+- `weak-simulator-three-chunk-tail/`
+  - deterministic weak-mode archive with three chunks sized `4/4/2`
+  - pruned fixture keeps the tail two chunks, so decrypt yields the residual plaintext `EFGHIJ`
+  - `expected.json` also records that the sealed fixture still refuses decryption because it remains above threshold
 - `simulated-strong-two-chunk/`
   - deterministic simulated-strong archive before prune
   - deterministic simulated-strong archive after pruning to one chunk
   - matching trusted-store simulator state for each archive version
   - expected inspect outputs and residual plaintext
+- `simulated-strong-three-chunk-stale-copy/`
+  - deterministic simulated-strong archive with three chunks sized `4/4/3`
+  - pruned fixture keeps non-adjacent chunks, so decrypt yields the residual plaintext `ABCDIJK`
+  - `expected.json` also records stale-store rejection for the pre-prune sealed archive when it is checked against the post-prune trusted-store simulator state
 
 Fixture generation is stabilized with:
 
 - fixed archive IDs
 - fixed `created_at` timestamp
 - deterministic pseudo-random bytes instead of real randomness
-- a small two-chunk plaintext (`ABCD1234`)
+- small readable plaintexts and fixed keep-sets, including three-chunk tail and non-adjacent survivor cases
 
-`go test ./...` runs `TestDeterministicVectorFixtures`, which regenerates these artifacts in-memory and checks that the checked-in files still match exactly and still inspect/decrypt as documented.
+`go test ./...` runs `TestDeterministicVectorFixtures`, which regenerates these artifacts in-memory and checks that the checked-in files still match exactly, still inspect/decrypt as documented, and still exhibit the simulator-only stale trusted-store behavior described above.

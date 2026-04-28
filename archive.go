@@ -25,6 +25,8 @@ const trustedStoreFormat = "bship-trusted-store-v1"
 const nonceSize = 12
 const keySize = 32
 
+var deterministicSealTimestamp = time.Date(2026, time.April, 29, 0, 0, 0, 0, time.UTC)
+
 var (
 	errThresholdExceeded = errors.New("remaining plaintext exceeds threshold")
 	errDestroyedCapsule  = errors.New("chunk capsule has been destroyed")
@@ -106,6 +108,7 @@ type SealOptions struct {
 	ChunkSizeBytes   int
 	Mode             Mode
 	TrustedStorePath string
+	Deterministic    bool
 	ArchiveID        string
 	Now              func() time.Time
 	Rand             io.Reader
@@ -164,6 +167,14 @@ func SealFile(opts SealOptions) (*Archive, error) {
 	mode, err := normalizeMode(opts.Mode)
 	if err != nil {
 		return nil, err
+	}
+	if opts.Deterministic {
+		if opts.Rand == nil {
+			opts.Rand = &deterministicEntropyReader{}
+		}
+		if opts.Now == nil {
+			opts.Now = deterministicNow
+		}
 	}
 	random := opts.Rand
 	if random == nil {
@@ -683,6 +694,9 @@ type capsuleAAD struct {
 }
 
 func sealAESGCM(key, nonce, plaintext, aad []byte) ([]byte, error) {
+	if err := requireNonceSize("AES-GCM nonce", nonce); err != nil {
+		return nil, err
+	}
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
@@ -695,6 +709,9 @@ func sealAESGCM(key, nonce, plaintext, aad []byte) ([]byte, error) {
 }
 
 func openAESGCM(key, nonce, ciphertext, aad []byte) ([]byte, error) {
+	if err := requireNonceSize("AES-GCM nonce", nonce); err != nil {
+		return nil, err
+	}
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
@@ -766,6 +783,22 @@ func normalizeMode(mode Mode) (Mode, error) {
 	}
 }
 
+type deterministicEntropyReader struct {
+	next byte
+}
+
+func (r *deterministicEntropyReader) Read(p []byte) (int, error) {
+	for i := range p {
+		p[i] = r.next
+		r.next++
+	}
+	return len(p), nil
+}
+
+func deterministicNow() time.Time {
+	return deterministicSealTimestamp
+}
+
 func encodeBase64URL(data []byte) string {
 	return base64.RawURLEncoding.EncodeToString(data)
 }
@@ -778,6 +811,9 @@ func chunkBytes(chunk StoredChunk) ([]byte, []byte, error) {
 	nonce, err := decodeBase64URL(chunk.NonceBase64)
 	if err != nil {
 		return nil, nil, fmt.Errorf("decode chunk nonce %s: %w", chunk.ID, err)
+	}
+	if err := requireNonceSize(fmt.Sprintf("chunk nonce %s", chunk.ID), nonce); err != nil {
+		return nil, nil, err
 	}
 	ciphertext, err := decodeBase64URL(chunk.Ciphertext)
 	if err != nil {
@@ -796,6 +832,9 @@ func capsuleBytes(capsule Capsule) ([]byte, []byte, error) {
 	nonce, err := decodeBase64URL(capsule.NonceBase64)
 	if err != nil {
 		return nil, nil, fmt.Errorf("decode capsule nonce %s: %w", capsule.ChunkID, err)
+	}
+	if err := requireNonceSize(fmt.Sprintf("capsule nonce %s", capsule.ChunkID), nonce); err != nil {
+		return nil, nil, err
 	}
 	ciphertext, err := decodeBase64URL(capsule.Ciphertext)
 	if err != nil {
@@ -818,6 +857,13 @@ func randomBytes(r io.Reader, size int) ([]byte, error) {
 		return nil, err
 	}
 	return buf, nil
+}
+
+func requireNonceSize(label string, nonce []byte) error {
+	if len(nonce) != nonceSize {
+		return fmt.Errorf("%s must be %d bytes, got %d", label, nonceSize, len(nonce))
+	}
+	return nil
 }
 
 func mustJSON(v any) []byte {

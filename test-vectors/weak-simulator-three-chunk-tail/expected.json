@@ -1,0 +1,56 @@
+{
+  "warning": "Prototype/simulator test vector only; not production-security material.",
+  "source_plaintext_utf8": "ABCDEFGHIJ",
+  "manifest_chunk_plaintext_sizes": [
+    4,
+    4,
+    2
+  ],
+  "sealed_inspection": {
+    "archive_id": "weak-simulator-three-chunk-vector",
+    "version": 0,
+    "threshold_bytes": 6,
+    "total_plaintext_bytes": 10,
+    "remaining_plaintext_bytes": 10,
+    "chunk_size_bytes": 4,
+    "total_chunks": 3,
+    "remaining_chunks": 3,
+    "destroyed_chunk_ids": [],
+    "remaining_chunk_ids": [
+      "chunk-0000",
+      "chunk-0001",
+      "chunk-0002"
+    ],
+    "decryptable": false,
+    "current_root": "oTWhoaXK1eL0PvYIBgwK3sGB_jpJFHo-OYyBLWVQU0g",
+    "trusted_store_verified": false
+  },
+  "pruned_inspection": {
+    "archive_id": "weak-simulator-three-chunk-vector",
+    "version": 1,
+    "threshold_bytes": 6,
+    "total_plaintext_bytes": 10,
+    "remaining_plaintext_bytes": 6,
+    "chunk_size_bytes": 4,
+    "total_chunks": 3,
+    "remaining_chunks": 2,
+    "destroyed_chunk_ids": [
+      "chunk-0000"
+    ],
+    "remaining_chunk_ids": [
+      "chunk-0001",
+      "chunk-0002"
+    ],
+    "decryptable": true,
+    "current_root": "XeZ6XoSYSQ95g6Rztj91Q2ue8ScKFpWe4Y3kygp00I0",
+    "trusted_store_verified": false
+  },
+  "pruned_plaintext_utf8": "EFGHIJ",
+  "extra_decryption_checks": [
+    {
+      "name": "sealed archive remains above threshold",
+      "archive": "sealed.bship",
+      "error_contains": "remaining plaintext exceeds threshold"
+    }
+  ]
+}

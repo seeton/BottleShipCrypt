@@ -118,6 +118,62 @@ func TestDestroyedChunkIrrecoverable(t *testing.T) {
 	}
 }
 
+func TestArchiveRejectsInvalidNonceLengths(t *testing.T) {
+	tests := []struct {
+		name   string
+		mutate func(*Archive)
+	}{
+		{
+			name: "chunk nonce",
+			mutate: func(archive *Archive) {
+				archive.Chunks[0].NonceBase64 = encodeBase64URL([]byte{0x01})
+			},
+		},
+		{
+			name: "capsule nonce",
+			mutate: func(archive *Archive) {
+				archive.Capsules[0].NonceBase64 = encodeBase64URL([]byte{0x02})
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := testWorkspace(t)
+			inputPath := filepath.Join(dir, "nonce.bin")
+			archivePath := filepath.Join(dir, "nonce.bship")
+			writeTestFile(t, inputPath, []byte("abcd"))
+
+			_, err := SealFile(SealOptions{
+				InputPath:      inputPath,
+				ArchivePath:    archivePath,
+				ThresholdBytes: 4,
+				ChunkSizeBytes: 4,
+				ArchiveID:      "nonce-test",
+				Now:            fixedNow,
+				Rand:           &deterministicReader{},
+			})
+			if err != nil {
+				t.Fatalf("seal: %v", err)
+			}
+
+			archive, err := loadArchive(archivePath)
+			if err != nil {
+				t.Fatalf("load archive: %v", err)
+			}
+			tt.mutate(archive)
+			if err := writeArchive(archivePath, archive); err != nil {
+				t.Fatalf("write archive: %v", err)
+			}
+
+			_, err = DecryptArchive(DecryptOptions{ArchivePath: archivePath})
+			if err == nil || !strings.Contains(err.Error(), "must be 12 bytes") {
+				t.Fatalf("decrypt error = %v, want invalid nonce length", err)
+			}
+		})
+	}
+}
+
 func TestNormalizeModeAcceptsPreferredAndAlias(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -264,6 +320,132 @@ func TestWeakModeCopyBeforePruneAttackSucceeds(t *testing.T) {
 	combined := append(append([]byte(nil), first...), second...)
 	if string(combined) != "abcdefgh" {
 		t.Fatalf("combined plaintext = %q, want full original", combined)
+	}
+}
+
+func TestSealFileDeterministicModeStable(t *testing.T) {
+	tests := []struct {
+		name      string
+		mode      Mode
+		withStore bool
+	}{
+		{name: "weak", mode: WeakMode},
+		{name: "simulated-strong", mode: StrongMode, withStore: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := testWorkspace(t)
+			inputPath := filepath.Join(dir, "input.bin")
+			archivePathA := filepath.Join(dir, "first.bship")
+			archivePathB := filepath.Join(dir, "second.bship")
+			storePathA := filepath.Join(dir, "first-trusted.json")
+			storePathB := filepath.Join(dir, "second-trusted.json")
+			writeTestFile(t, inputPath, []byte("ABCD1234"))
+
+			seal := func(archivePath, storePath string) {
+				t.Helper()
+				_, err := SealFile(SealOptions{
+					InputPath:        inputPath,
+					ArchivePath:      archivePath,
+					ThresholdBytes:   4,
+					ChunkSizeBytes:   4,
+					Mode:             tt.mode,
+					TrustedStorePath: storePath,
+					Deterministic:    true,
+					ArchiveID:        "deterministic-" + tt.name,
+				})
+				if err != nil {
+					t.Fatalf("seal %s: %v", archivePath, err)
+				}
+			}
+
+			seal(archivePathA, storePathA)
+			seal(archivePathB, storePathB)
+
+			if !bytes.Equal(readTestFile(t, archivePathA), readTestFile(t, archivePathB)) {
+				t.Fatalf("%s deterministic seal output differed", tt.name)
+			}
+			if tt.withStore && !bytes.Equal(readTestFile(t, storePathA), readTestFile(t, storePathB)) {
+				t.Fatalf("%s deterministic trusted-store output differed", tt.name)
+			}
+
+			prune := func(archivePath, storePath string) []byte {
+				t.Helper()
+				if _, err := PruneArchive(PruneOptions{
+					ArchivePath:      archivePath,
+					Keep:             []string{"0"},
+					Mode:             tt.mode,
+					TrustedStorePath: storePath,
+				}); err != nil {
+					t.Fatalf("prune %s: %v", archivePath, err)
+				}
+				plaintext, err := DecryptArchive(DecryptOptions{
+					ArchivePath:      archivePath,
+					Mode:             tt.mode,
+					TrustedStorePath: storePath,
+				})
+				if err != nil {
+					t.Fatalf("decrypt %s: %v", archivePath, err)
+				}
+				return plaintext
+			}
+
+			plaintextA := prune(archivePathA, storePathA)
+			plaintextB := prune(archivePathB, storePathB)
+			if string(plaintextA) != "ABCD" || string(plaintextB) != "ABCD" {
+				t.Fatalf("%s deterministic decrypt outputs = %q and %q, want %q", tt.name, plaintextA, plaintextB, "ABCD")
+			}
+			if !bytes.Equal(readTestFile(t, archivePathA), readTestFile(t, archivePathB)) {
+				t.Fatalf("%s deterministic pruned archive output differed", tt.name)
+			}
+			if tt.withStore && !bytes.Equal(readTestFile(t, storePathA), readTestFile(t, storePathB)) {
+				t.Fatalf("%s deterministic pruned trusted-store output differed", tt.name)
+			}
+		})
+	}
+}
+
+func TestSealFileWithoutDeterministicStillRandomized(t *testing.T) {
+	dir := testWorkspace(t)
+	inputPath := filepath.Join(dir, "input.bin")
+	archivePathA := filepath.Join(dir, "first.bship")
+	archivePathB := filepath.Join(dir, "second.bship")
+	writeTestFile(t, inputPath, []byte("ABCD1234"))
+
+	seal := func(path string) {
+		t.Helper()
+		_, err := SealFile(SealOptions{
+			InputPath:      inputPath,
+			ArchivePath:    path,
+			ThresholdBytes: 4,
+			ChunkSizeBytes: 4,
+			ArchiveID:      "non-deterministic-check",
+			Now:            fixedNow,
+		})
+		if err != nil {
+			t.Fatalf("seal %s: %v", path, err)
+		}
+	}
+
+	seal(archivePathA)
+	seal(archivePathB)
+
+	if bytes.Equal(readTestFile(t, archivePathA), readTestFile(t, archivePathB)) {
+		t.Fatal("seal output unexpectedly matched without deterministic mode")
+	}
+
+	for _, path := range []string{archivePathA, archivePathB} {
+		if _, err := PruneArchive(PruneOptions{ArchivePath: path, Keep: []string{"0"}}); err != nil {
+			t.Fatalf("prune %s: %v", path, err)
+		}
+		plaintext, err := DecryptArchive(DecryptOptions{ArchivePath: path})
+		if err != nil {
+			t.Fatalf("decrypt %s: %v", path, err)
+		}
+		if string(plaintext) != "ABCD" {
+			t.Fatalf("decrypt %s = %q, want %q", path, plaintext, "ABCD")
+		}
 	}
 }
 

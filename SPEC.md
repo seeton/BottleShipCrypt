@@ -104,8 +104,8 @@ Example:
   "chunk_size_bytes": 1048576,
   "created_at": "2026-04-29T00:00:00Z",
   "crypto": {
-    "aead": "AES-GCM-256",
-    "kdf": "HKDF-SHA-256",
+    "chunk_aead": "AES-GCM-256",
+    "capsule_aead": "AES-GCM-256",
     "hash": "SHA-256"
   },
   "chunks": [
@@ -122,6 +122,8 @@ Example:
   "manifest_hash": "base64url-sha256"
 }
 ```
+
+In the current Go prototype, `seal` does not derive chunk keys from a manifest-declared KDF. It samples independent random 256-bit chunk keys and a random 256-bit capsule-wrap key directly from `crypto/rand`, then records the AEAD and hash identifiers above.
 
 ### 4.2 State
 
@@ -148,6 +150,19 @@ In the strong model, the trusted component maintains an authenticated root over 
 - state version or monotonic counter
 
 If a host-visible `state.json` exists, it is only a cache or transcript. The trusted component's state is authoritative.
+
+### 4.3 Current prototype canonical hashing
+
+The current Go prototype authenticates archive metadata with the following concrete hash inputs:
+
+- `manifest_hash = SHA-256(json.Marshal(Manifest))`, with the `manifest_hash` field cleared before hashing
+- `ciphertext_hash = SHA-256(chunk_nonce || chunk_ciphertext)`
+- `capsule_hash = SHA-256(capsule_nonce || capsule_ciphertext)`
+- `current_root = SHA-256(json.Marshal({archive_id, version, remaining_chunk_ids, remaining_plaintext_bytes, threshold_bytes, manifest_hash}))`
+
+This is acceptable for the current single-implementation prototype because the same Go code writes and verifies the archive.
+
+It is **not** yet a cross-language canonicalization contract. A production strong-model implementation must standardize the exact canonical bytes or use an explicit canonical encoding so that authenticated roots remain stable across implementations and upgrades.
 
 ## 5. Operations
 
@@ -318,6 +333,7 @@ A production implementation requires at least:
 
 - a trusted component such as an HSM, TPM-backed service, TEE with anti-rollback state, or remote trusted service
 - authenticated manifest roots and metadata binding
+- a written canonicalization/canonical-hashing specification rather than implicit dependence on one language runtime's JSON serialization
 - trusted key unsealing for live chunks only
 - irreversible capsule destruction or equivalent key invalidation
 - monotonic counter or equivalent anti-rollback state

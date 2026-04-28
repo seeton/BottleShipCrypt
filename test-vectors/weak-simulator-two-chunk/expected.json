@@ -1,6 +1,10 @@
 {
   "warning": "Prototype/simulator test vector only; not production-security material.",
   "source_plaintext_utf8": "ABCD1234",
+  "manifest_chunk_plaintext_sizes": [
+    4,
+    4
+  ],
   "sealed_inspection": {
     "archive_id": "weak-simulator-vector",
     "version": 0,

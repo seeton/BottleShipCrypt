@@ -97,10 +97,10 @@ Current items here refer to the local trusted-store simulator, not a real truste
 
 ## Phase 7: Hardening
 
-- [ ] Review AEAD usage
-- [ ] Review nonce generation
-- [ ] Review key derivation
-- [ ] Review manifest canonicalization
+- [x] Review AEAD usage
+- [x] Review nonce generation
+- [x] Review key derivation
+- [x] Review manifest canonicalization
 - [ ] Review chunk ordering
 - [ ] Review metadata authentication
 - [ ] Add fuzz tests

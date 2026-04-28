@@ -1,0 +1,11 @@
+{
+  "format": "bship-trusted-store-v1",
+  "archives": [
+    {
+      "archive_id": "simulated-strong-three-chunk-vector",
+      "version": 0,
+      "root": "SGhuFTQDgjtvuk8I0321azw2Qxgp9sdgKTSPNuzIyvk",
+      "wrap_key_b64": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8"
+    }
+  ]
+}

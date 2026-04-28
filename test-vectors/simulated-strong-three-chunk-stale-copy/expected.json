@@ -1,0 +1,74 @@
+{
+  "warning": "Prototype/simulator test vector only; not production-security material.",
+  "source_plaintext_utf8": "ABCDEFGHIJK",
+  "manifest_chunk_plaintext_sizes": [
+    4,
+    4,
+    3
+  ],
+  "sealed_inspection": {
+    "archive_id": "simulated-strong-three-chunk-vector",
+    "version": 0,
+    "threshold_bytes": 7,
+    "total_plaintext_bytes": 11,
+    "remaining_plaintext_bytes": 11,
+    "chunk_size_bytes": 4,
+    "total_chunks": 3,
+    "remaining_chunks": 3,
+    "destroyed_chunk_ids": [],
+    "remaining_chunk_ids": [
+      "chunk-0000",
+      "chunk-0001",
+      "chunk-0002"
+    ],
+    "decryptable": false,
+    "current_root": "SGhuFTQDgjtvuk8I0321azw2Qxgp9sdgKTSPNuzIyvk",
+    "trusted_store_verified": true
+  },
+  "pruned_inspection": {
+    "archive_id": "simulated-strong-three-chunk-vector",
+    "version": 1,
+    "threshold_bytes": 7,
+    "total_plaintext_bytes": 11,
+    "remaining_plaintext_bytes": 7,
+    "chunk_size_bytes": 4,
+    "total_chunks": 3,
+    "remaining_chunks": 2,
+    "destroyed_chunk_ids": [
+      "chunk-0001"
+    ],
+    "remaining_chunk_ids": [
+      "chunk-0000",
+      "chunk-0002"
+    ],
+    "decryptable": true,
+    "current_root": "-ehW3ChGV1uW3bACpKHfpiWo97haXTmPZLcs-8KcfR0",
+    "trusted_store_verified": true
+  },
+  "pruned_plaintext_utf8": "ABCDIJK",
+  "extra_inspection_checks": [
+    {
+      "name": "sealed archive rejected against advanced trusted store",
+      "archive": "sealed.bship",
+      "trusted_store": "pruned.trusted-store.json",
+      "mode": "simulated-strong",
+      "error_contains": "archive state does not match trusted store"
+    }
+  ],
+  "extra_decryption_checks": [
+    {
+      "name": "sealed archive remains above threshold",
+      "archive": "sealed.bship",
+      "trusted_store": "sealed.trusted-store.json",
+      "mode": "simulated-strong",
+      "error_contains": "remaining plaintext exceeds threshold"
+    },
+    {
+      "name": "sealed archive rejected against advanced trusted store",
+      "archive": "sealed.bship",
+      "trusted_store": "pruned.trusted-store.json",
+      "mode": "simulated-strong",
+      "error_contains": "archive state does not match trusted store"
+    }
+  ]
+}

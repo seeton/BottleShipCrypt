@@ -9,8 +9,10 @@ import (
 )
 
 const (
-	modeFlagHelp         = "mode to use: weak (default) or simulated-strong; \"strong\" remains a compatibility alias for the simulator-backed mode"
-	trustedStoreFlagHelp = "path to local JSON trusted-store simulator state for simulated-strong/strong; this file is demo/test state, not a secure trusted component"
+	modeFlagHelp          = "mode to use: weak (default) or simulated-strong; \"strong\" remains a compatibility alias for the simulator-backed mode"
+	trustedStoreFlagHelp  = "path to local JSON trusted-store simulator state for simulated-strong/strong; this file is demo/test state, not a secure trusted component"
+	deterministicFlagHelp = "use fixed timestamp and deterministic bytes for reproducible test/demo artifacts; not for real security"
+	archiveIDFlagHelp     = "explicit archive ID (useful with --deterministic when reproducing fixtures)"
 )
 
 func RunCLI(args []string, stdout, stderr io.Writer) int {
@@ -46,6 +48,8 @@ func runSeal(args []string, stdout, stderr io.Writer) int {
 	chunkSize := fs.Int("chunk-size", 1024, "plaintext chunk size in bytes")
 	modeValue := fs.String("mode", string(WeakMode), modeFlagHelp)
 	storePath := fs.String("trusted-store", "", trustedStoreFlagHelp)
+	deterministic := fs.Bool("deterministic", false, deterministicFlagHelp)
+	archiveID := fs.String("archive-id", "", archiveIDFlagHelp)
 	if err := fs.Parse(args); err != nil {
 		if err == flag.ErrHelp {
 			return 0
@@ -65,6 +69,8 @@ func runSeal(args []string, stdout, stderr io.Writer) int {
 		ChunkSizeBytes:   *chunkSize,
 		Mode:             mode,
 		TrustedStorePath: *storePath,
+		Deterministic:    *deterministic,
+		ArchiveID:        *archiveID,
 	})
 	if err != nil {
 		fmt.Fprintln(stderr, err)
@@ -179,6 +185,7 @@ func printUsage(w io.Writer) {
 	fmt.Fprintf(w, "  %s              archive carries all decryption material in the archive itself.\n", WeakMode)
 	fmt.Fprintf(w, "  %s  local JSON trusted-store simulator; %q is accepted as a compatibility alias.\n", StrongMode, StrongModeAlias)
 	fmt.Fprintln(w, "                     This simulator state is not a secure trusted component or strong-model security boundary.")
+	fmt.Fprintln(w, "  seal --deterministic  reproducible demo/test artifact mode with fixed metadata and deterministic bytes; not real security.")
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, `Use "bship <command> -h" for command-specific flags.`)
 }

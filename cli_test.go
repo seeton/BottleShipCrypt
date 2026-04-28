@@ -20,6 +20,8 @@ func TestCLITopLevelUsageMentionsSimulator(t *testing.T) {
 		"compatibility alias",
 		"local JSON trusted-store simulator",
 		"not a secure trusted component",
+		"seal --deterministic",
+		"not real security",
 	} {
 		if !strings.Contains(usage, want) {
 			t.Fatalf("usage missing %q:\n%s", want, usage)
@@ -39,6 +41,9 @@ func TestCLISealHelpMentionsSimulatorAndReturnsZero(t *testing.T) {
 		"\"strong\" remains a compatibility alias",
 		"local JSON trusted-store simulator state",
 		"not secure hardware or a trusted component",
+		"-deterministic",
+		"reproducible test/demo artifacts",
+		"-archive-id string",
 	} {
 		if !strings.Contains(help, want) {
 			t.Fatalf("help missing %q:\n%s", want, help)
@@ -177,5 +182,58 @@ func TestCLIRejectsUnknownMode(t *testing.T) {
 	}
 	if !strings.Contains(stderr.String(), `unsupported mode "actually-strong"`) {
 		t.Fatalf("unexpected error output:\n%s", stderr.String())
+	}
+}
+
+func TestCLISealDeterministicProducesStableOutputs(t *testing.T) {
+	tests := []struct {
+		name      string
+		mode      string
+		withStore bool
+	}{
+		{name: "weak"},
+		{name: "simulated-strong", mode: string(StrongMode), withStore: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := testWorkspace(t)
+			inputPath := filepath.Join(dir, "input.bin")
+			archivePathA := filepath.Join(dir, "first.bship")
+			archivePathB := filepath.Join(dir, "second.bship")
+			storePathA := filepath.Join(dir, "first-trusted.json")
+			storePathB := filepath.Join(dir, "second-trusted.json")
+			writeTestFile(t, inputPath, []byte("ABCD1234"))
+
+			argsFor := func(archivePath, storePath string) []string {
+				args := []string{
+					"seal",
+					"--in", inputPath,
+					"--out", archivePath,
+					"--threshold", "4",
+					"--chunk-size", "4",
+					"--deterministic",
+					"--archive-id", "cli-deterministic-" + tt.name,
+				}
+				if tt.mode != "" {
+					args = append(args, "--mode", tt.mode, "--trusted-store", storePath)
+				}
+				return args
+			}
+
+			if code := RunCLI(argsFor(archivePathA, storePathA), ioDiscard(), ioDiscard()); code != 0 {
+				t.Fatalf("first seal exited with code %d", code)
+			}
+			if code := RunCLI(argsFor(archivePathB, storePathB), ioDiscard(), ioDiscard()); code != 0 {
+				t.Fatalf("second seal exited with code %d", code)
+			}
+
+			if !bytes.Equal(readTestFile(t, archivePathA), readTestFile(t, archivePathB)) {
+				t.Fatalf("%s deterministic archive outputs differed", tt.name)
+			}
+			if tt.withStore && !bytes.Equal(readTestFile(t, storePathA), readTestFile(t, storePathB)) {
+				t.Fatalf("%s deterministic trusted-store outputs differed", tt.name)
+			}
+		})
 	}
 }

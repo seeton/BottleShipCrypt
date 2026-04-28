@@ -187,4 +187,5 @@ The right interpretation is:
 - BottleShip is a plausible **strong-model** construction concept.
 - Its proof target is an idealized trusted component.
 - Browser and CLI implementations outside that component are useful for demonstrating or simulating the state machine.
+- The current Go simulator realizes authenticated manifest/root binding with SHA-256 over Go JSON serialization of fixed structs; that is a prototype mechanism, not yet a language-independent canonicalization standard.
 - Ordinary filesystems and browser demos do not satisfy the strong model, so they do not realize the full BottleShip security claim.
