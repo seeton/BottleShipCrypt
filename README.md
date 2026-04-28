@@ -69,7 +69,7 @@ Run:
 go run ./cmd/bship help
 ```
 
-Use weak mode for archive-only behavior, or `--mode simulated-strong --trusted-store <path>` for the local trusted-store simulator. This remains a local simulator, not production security.
+Use weak mode for archive-only behavior, or `--mode simulated-strong --trusted-store <path>` for the local trusted-store simulator. The older `--mode strong` spelling is still accepted as a compatibility alias, but `simulated-strong` is the preferred name. This remains a local simulator, not production security.
 
 ## License
 

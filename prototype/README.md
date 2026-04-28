@@ -1,6 +1,6 @@
 # Prototype workspace
 
-This directory is reserved for future implementation stages and design notes. It does not currently contain the active browser demo or the current Go CLI/archive simulator. Those live in `docs/` and at the repository root (for example `cmd/bship`) respectively.
+This directory is reserved for future implementation stages and design notes. It does not currently contain the active browser demo or the current non-browser simulator implementation. Those live in `docs/` and in the Go CLI at the repository root in `cmd/bship` respectively.
 
 Planned work here includes:
 

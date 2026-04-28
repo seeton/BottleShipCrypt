@@ -9,9 +9,8 @@ import (
 )
 
 const (
-	simulatedStrongMode  Mode = "simulated-strong"
-	modeFlagHelp              = "mode to use: weak (default) or simulated-strong; \"strong\" remains a compatibility alias for the simulator-backed mode"
-	trustedStoreFlagHelp      = "path to local JSON trusted-store simulator state for simulated-strong/strong; this file is demo/test state, not a secure trusted component"
+	modeFlagHelp         = "mode to use: weak (default) or simulated-strong; \"strong\" remains a compatibility alias for the simulator-backed mode"
+	trustedStoreFlagHelp = "path to local JSON trusted-store simulator state for simulated-strong/strong; this file is demo/test state, not a secure trusted component"
 )
 
 func RunCLI(args []string, stdout, stderr io.Writer) int {
@@ -178,7 +177,7 @@ func printUsage(w io.Writer) {
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "Modes:")
 	fmt.Fprintf(w, "  %s              archive carries all decryption material in the archive itself.\n", WeakMode)
-	fmt.Fprintf(w, "  %s  local JSON trusted-store simulator; %q is accepted as a compatibility alias.\n", simulatedStrongMode, StrongMode)
+	fmt.Fprintf(w, "  %s  local JSON trusted-store simulator; %q is accepted as a compatibility alias.\n", StrongMode, StrongModeAlias)
 	fmt.Fprintln(w, "                     This simulator state is not a secure trusted component or strong-model security boundary.")
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, `Use "bship <command> -h" for command-specific flags.`)
@@ -197,21 +196,14 @@ func newCommandFlagSet(name, description string, stderr io.Writer) *flag.FlagSet
 		fmt.Fprintln(stderr)
 		fmt.Fprintln(stderr, "Mode notes:")
 		fmt.Fprintf(stderr, "  %s              archive-only state; copying old archives can bypass pruning.\n", WeakMode)
-		fmt.Fprintf(stderr, "  %s  local JSON trusted-store simulator; %q stays supported as an alias.\n", simulatedStrongMode, StrongMode)
+		fmt.Fprintf(stderr, "  %s  local JSON trusted-store simulator; %q stays supported as an alias.\n", StrongMode, StrongModeAlias)
 		fmt.Fprintln(stderr, "                     The trusted-store file is only local simulator state, not secure hardware or a trusted component.")
 	}
 	return fs
 }
 
 func parseCLIMode(value string) (Mode, error) {
-	switch strings.TrimSpace(strings.ToLower(value)) {
-	case "", string(WeakMode):
-		return WeakMode, nil
-	case string(StrongMode), string(simulatedStrongMode):
-		return StrongMode, nil
-	default:
-		return "", fmt.Errorf("unsupported mode %q (use %q or %q; %q remains a compatibility alias for the trusted-store simulator)", value, WeakMode, simulatedStrongMode, StrongMode)
-	}
+	return normalizeMode(Mode(value))
 }
 
 func splitCSV(value string) []string {

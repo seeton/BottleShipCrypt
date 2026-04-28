@@ -46,7 +46,33 @@ func TestCLISealHelpMentionsSimulatorAndReturnsZero(t *testing.T) {
 	}
 }
 
-func TestCLISimulatedStrongAliasWorks(t *testing.T) {
+func TestParseCLIModeAcceptsPreferredAndAlias(t *testing.T) {
+	tests := []struct {
+		name  string
+		value string
+		want  Mode
+	}{
+		{name: "default empty", value: "", want: WeakMode},
+		{name: "weak", value: "weak", want: WeakMode},
+		{name: "preferred simulated strong", value: string(StrongMode), want: StrongMode},
+		{name: "compatibility alias", value: string(StrongModeAlias), want: StrongMode},
+		{name: "trim and case fold", value: "  Simulated-Strong  ", want: StrongMode},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := parseCLIMode(tt.value)
+			if err != nil {
+				t.Fatalf("parseCLIMode(%q) error = %v", tt.value, err)
+			}
+			if got != tt.want {
+				t.Fatalf("parseCLIMode(%q) = %q, want %q", tt.value, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCLISimulatedStrongModeWorks(t *testing.T) {
 	dir := testWorkspace(t)
 	inputPath := filepath.Join(dir, "input.bin")
 	archivePath := filepath.Join(dir, "sample.bship")
@@ -61,7 +87,7 @@ func TestCLISimulatedStrongAliasWorks(t *testing.T) {
 		"--out", archivePath,
 		"--threshold", "4",
 		"--chunk-size", "4",
-		"--mode", string(simulatedStrongMode),
+		"--mode", string(StrongMode),
 		"--trusted-store", storePath,
 	}, ioDiscard(), ioDiscard()); code != 0 {
 		t.Fatalf("seal exited with code %d", code)
@@ -79,7 +105,7 @@ func TestCLISimulatedStrongAliasWorks(t *testing.T) {
 		"prune",
 		"--archive", archivePath,
 		"--keep", "0",
-		"--mode", string(simulatedStrongMode),
+		"--mode", string(StrongMode),
 		"--trusted-store", storePath,
 	}, ioDiscard(), ioDiscard()); code != 0 {
 		t.Fatalf("prune exited with code %d", code)
@@ -89,7 +115,7 @@ func TestCLISimulatedStrongAliasWorks(t *testing.T) {
 		"decrypt",
 		"--archive", archivePath,
 		"--out", outputPath,
-		"--mode", string(simulatedStrongMode),
+		"--mode", string(StrongMode),
 		"--trusted-store", storePath,
 	}, ioDiscard(), ioDiscard()); code != 0 {
 		t.Fatalf("decrypt exited with code %d", code)
@@ -101,6 +127,35 @@ func TestCLISimulatedStrongAliasWorks(t *testing.T) {
 	}
 	if string(got) != "abcd" {
 		t.Fatalf("decrypted output = %q, want %q", got, "abcd")
+	}
+}
+
+func TestCLIStrongAliasWorks(t *testing.T) {
+	dir := testWorkspace(t)
+	inputPath := filepath.Join(dir, "input.bin")
+	archivePath := filepath.Join(dir, "sample.bship")
+	storePath := filepath.Join(dir, "trusted.json")
+
+	writeTestFile(t, inputPath, []byte("abcdefgh"))
+
+	if code := RunCLI([]string{
+		"seal",
+		"--in", inputPath,
+		"--out", archivePath,
+		"--threshold", "4",
+		"--chunk-size", "4",
+		"--mode", string(StrongModeAlias),
+		"--trusted-store", storePath,
+	}, ioDiscard(), ioDiscard()); code != 0 {
+		t.Fatalf("seal exited with code %d", code)
+	}
+
+	archive, err := loadArchive(archivePath)
+	if err != nil {
+		t.Fatalf("load archive: %v", err)
+	}
+	if archive.State.CapsuleWrapKeyBase64 != "" {
+		t.Fatalf("%q alias should still activate simulated-strong behavior", StrongModeAlias)
 	}
 }
 

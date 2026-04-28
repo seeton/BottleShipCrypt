@@ -2,7 +2,7 @@
 
 ## Phase 0: Repository setup
 
-- [ ] Choose repository name: `bottleship`, `bship`, or `bottleship-crypto`
+- [x] Choose repository name: `BottleShipCrypt`
 - [x] Add `README.md`
 - [x] Add `SPEC.md`
 - [x] Add `SECURITY.md`
@@ -32,7 +32,7 @@
 
 ## Phase 2: Archive format prototype
 
-- [x] Define `.bship` archive layout
+- [x] Define JSON `.bship` archive layout
 - [ ] Support ZIP-like export or directory export
 - [x] Store manifest JSON
 - [x] Store encrypted chunks
@@ -45,7 +45,7 @@
 
 ## Phase 3: CLI prototype
 
-- [x] Choose language: Rust, Go, or Python
+- [x] Choose language: Go
 - [x] Implement `bship seal`
 - [x] Implement `bship inspect`
 - [x] Implement `bship prune`
@@ -86,14 +86,14 @@ Current items here refer to the local trusted-store simulator, not a real truste
 - [x] Add rigorous `SECURITY_PROOF.md`
 - [x] Align top-level docs around weak demo vs strong-model proof target
 - [ ] Add diagrams
-- [ ] Add glossary
+- [x] Add glossary
 - [ ] Add examples
 - [x] Add FAQ
-- [ ] Add "Why not normal encryption?"
-- [ ] Add "Why not secure deletion?"
-- [ ] Add "Why not access control?"
-- [ ] Add "Why GitHub Pages demo is weak"
-- [ ] Add "Strong model requirements"
+- [x] Add "Why not normal encryption?"
+- [x] Add "Why not secure deletion?"
+- [x] Add "Why not access control?"
+- [x] Add "Why GitHub Pages demo is weak"
+- [x] Add "Strong model requirements"
 
 ## Phase 7: Hardening
 

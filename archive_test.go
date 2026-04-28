@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
@@ -117,7 +118,54 @@ func TestDestroyedChunkIrrecoverable(t *testing.T) {
 	}
 }
 
-func TestStrongModeRejectsRollbackFromCopiedArchive(t *testing.T) {
+func TestNormalizeModeAcceptsPreferredAndAlias(t *testing.T) {
+	tests := []struct {
+		name  string
+		value Mode
+		want  Mode
+	}{
+		{name: "default empty", value: "", want: WeakMode},
+		{name: "weak", value: WeakMode, want: WeakMode},
+		{name: "preferred simulated strong", value: StrongMode, want: StrongMode},
+		{name: "compatibility alias", value: StrongModeAlias, want: StrongMode},
+		{name: "trim and case fold", value: Mode("  Simulated-Strong "), want: StrongMode},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := normalizeMode(tt.value)
+			if err != nil {
+				t.Fatalf("normalizeMode(%q) error = %v", tt.value, err)
+			}
+			if got != tt.want {
+				t.Fatalf("normalizeMode(%q) = %q, want %q", tt.value, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestSealFileRejectsInvalidMode(t *testing.T) {
+	dir := testWorkspace(t)
+	inputPath := filepath.Join(dir, "invalid-mode.bin")
+	archivePath := filepath.Join(dir, "invalid-mode.bship")
+	writeTestFile(t, inputPath, []byte("abcdefgh"))
+
+	_, err := SealFile(SealOptions{
+		InputPath:      inputPath,
+		ArchivePath:    archivePath,
+		ThresholdBytes: 4,
+		ChunkSizeBytes: 4,
+		Mode:           Mode("actually-strong"),
+	})
+	if err == nil {
+		t.Fatal("SealFile accepted invalid mode")
+	}
+	if !strings.Contains(err.Error(), `unsupported mode "actually-strong"`) {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestSimulatedStrongModeRejectsRollbackFromCopiedArchive(t *testing.T) {
 	dir := testWorkspace(t)
 	inputPath := filepath.Join(dir, "strong.bin")
 	archivePath := filepath.Join(dir, "strong.bship")
@@ -144,7 +192,7 @@ func TestStrongModeRejectsRollbackFromCopiedArchive(t *testing.T) {
 		t.Fatalf("load archive: %v", err)
 	}
 	if archive.State.CapsuleWrapKeyBase64 != "" {
-		t.Fatalf("strong-mode archive should not carry wrap key material")
+		t.Fatalf("simulated-strong archive should not carry wrap key material")
 	}
 
 	copyFile(t, archivePath, copyPath)

@@ -34,8 +34,9 @@ var (
 type Mode string
 
 const (
-	WeakMode   Mode = "weak"
-	StrongMode Mode = "strong"
+	WeakMode        Mode = "weak"
+	StrongMode      Mode = "simulated-strong"
+	StrongModeAlias Mode = "strong"
 )
 
 type Archive struct {
@@ -160,7 +161,10 @@ func SealFile(opts SealOptions) (*Archive, error) {
 		return nil, errors.New("chunk size must be > 0")
 	}
 
-	mode := normalizeMode(opts.Mode)
+	mode, err := normalizeMode(opts.Mode)
+	if err != nil {
+		return nil, err
+	}
 	random := opts.Rand
 	if random == nil {
 		random = rand.Reader
@@ -319,8 +323,12 @@ func InspectArchive(opts InspectOptions) (*Inspection, error) {
 	if err != nil {
 		return nil, err
 	}
+	mode, err := normalizeMode(opts.Mode)
+	if err != nil {
+		return nil, err
+	}
 	verified := false
-	if normalizeMode(opts.Mode) == StrongMode {
+	if mode == StrongMode {
 		storePath := trustedStorePathFor(opts.ArchivePath, opts.TrustedStorePath)
 		if err := verifyTrustedState(storePath, archive); err != nil {
 			return nil, err
@@ -358,7 +366,10 @@ func PruneArchive(opts PruneOptions) (*Archive, error) {
 		return nil, err
 	}
 
-	mode := normalizeMode(opts.Mode)
+	mode, err := normalizeMode(opts.Mode)
+	if err != nil {
+		return nil, err
+	}
 	storePath := trustedStorePathFor(opts.ArchivePath, opts.TrustedStorePath)
 	if mode == StrongMode {
 		if err := verifyTrustedState(storePath, archive); err != nil {
@@ -428,7 +439,11 @@ func DecryptArchive(opts DecryptOptions) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if normalizeMode(opts.Mode) == StrongMode {
+	mode, err := normalizeMode(opts.Mode)
+	if err != nil {
+		return nil, err
+	}
+	if mode == StrongMode {
 		if err := verifyTrustedState(trustedStorePathFor(opts.ArchivePath, opts.TrustedStorePath), archive); err != nil {
 			return nil, err
 		}
@@ -437,7 +452,7 @@ func DecryptArchive(opts DecryptOptions) ([]byte, error) {
 		return nil, errThresholdExceeded
 	}
 
-	wrapKey, err := decryptWrapKey(opts, archive)
+	wrapKey, err := decryptWrapKey(opts, archive, mode)
 	if err != nil {
 		return nil, err
 	}
@@ -567,8 +582,8 @@ func validateArchive(archive *Archive) error {
 	return nil
 }
 
-func decryptWrapKey(opts DecryptOptions, archive *Archive) ([]byte, error) {
-	if normalizeMode(opts.Mode) == StrongMode {
+func decryptWrapKey(opts DecryptOptions, archive *Archive, mode Mode) ([]byte, error) {
+	if mode == StrongMode {
 		return trustedWrapKey(trustedStorePathFor(opts.ArchivePath, opts.TrustedStorePath), archive)
 	}
 	if archive.State.CapsuleWrapKeyBase64 == "" {
@@ -740,11 +755,15 @@ func trustedStorePathFor(archivePath, explicit string) string {
 	return filepath.Join(filepath.Dir(archivePath), ".bship-trusted.json")
 }
 
-func normalizeMode(mode Mode) Mode {
-	if mode == StrongMode {
-		return StrongMode
+func normalizeMode(mode Mode) (Mode, error) {
+	switch Mode(strings.TrimSpace(strings.ToLower(string(mode)))) {
+	case "", WeakMode:
+		return WeakMode, nil
+	case StrongMode, StrongModeAlias:
+		return StrongMode, nil
+	default:
+		return "", fmt.Errorf("unsupported mode %q (use %q or %q; %q remains a compatibility alias for the trusted-store simulator)", mode, WeakMode, StrongMode, StrongModeAlias)
 	}
-	return WeakMode
 }
 
 func encodeBase64URL(data []byte) string {
