@@ -81,6 +81,8 @@
 
 ## Phase 6: Documentation
 
+- [x] Add rigorous `SECURITY_PROOF.md`
+- [x] Align top-level docs around weak demo vs strong-model proof target
 - [ ] Add diagrams
 - [ ] Add glossary
 - [ ] Add examples

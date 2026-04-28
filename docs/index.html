@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>BottleShip Demo</title>
+  <title>BottleShip Weak-Model Demo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     :root {
@@ -39,6 +39,29 @@
     .warning {
       border-color: #b45309;
       background: #fffbeb;
+    }
+
+    .comparison-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .comparison-card {
+      padding: 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      background: #f9fafb;
+    }
+
+    .comparison-card h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+    }
+
+    .comparison-card ul {
+      margin: 0;
+      padding-left: 1.25rem;
     }
 
     .grid {
@@ -155,17 +178,51 @@
   </style>
 </head>
 <body>
-  <h1>BottleShip Demo</h1>
+  <h1>BottleShip Weak-Model Browser Demo</h1>
   <p>
-    This page demonstrates the mechanics of capacity-bounded destructive residual decryption in a browser.
-    It is an educational prototype only.
+    This page visualizes BottleShip mechanics in a weak browser model.
+    It is useful for learning the flow, but it is not the strong model and must not be treated as a secure implementation.
   </p>
 
   <section class="panel warning">
-    <strong>Research prototype only.</strong>
+    <strong>Unsafe for real secrets: weak-model visualization only.</strong>
     <p>
-      This demo does not provide real irreversible destruction, rollback resistance, or copy resistance.
-      Key capsules are simulated in memory and the archive state can be copied or modified by the user.
+      The browser demo cannot enforce irreversible capsule destruction, rollback-resistant state, trusted key custody, or copy resistance.
+      A user can inspect or modify the JavaScript, duplicate the archive state, or restore an earlier snapshot.
+      The in-memory key capsules shown here are only a teaching aid.
+    </p>
+    <p>
+      The strong BottleShip model requires a trusted component that holds state outside user control, rejects rollback, and destroys capsules irreversibly.
+      For that path, use the trusted-state simulator work in
+      <a href="https://github.com/seeton/BottleShipCrypt/tree/main/prototype">the <code>prototype/</code> simulator path</a>,
+      not this browser page.
+    </p>
+  </section>
+
+  <section class="panel">
+    <h2>Weak demo vs. strong trusted-state model</h2>
+    <div class="comparison-grid">
+      <div class="comparison-card">
+        <h3>Weak browser demo</h3>
+        <ul>
+          <li>Runs entirely in user-controlled JavaScript.</li>
+          <li>Stores simulated capsules only in browser memory.</li>
+          <li>Can illustrate threshold refusal and prune flow.</li>
+          <li>Cannot stop copying, rollback, or code tampering.</li>
+        </ul>
+      </div>
+      <div class="comparison-card">
+        <h3>Strong trusted-state model</h3>
+        <ul>
+          <li>Uses a trusted component to hold capsule/state custody.</li>
+          <li>Requires rollback-resistant state across operations.</li>
+          <li>Must perform irreversible capsule destruction when pruning.</li>
+          <li>Is the path to evaluate for real security claims.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="muted">
+      Keep using this page to explore the mechanics. Switch to the <code>prototype/</code> trusted-state simulator path when you want the strong-model architecture.
     </p>
   </section>
 
@@ -191,6 +248,7 @@
     </div>
     <p class="muted">
       If the remaining decryptable bytes exceed the threshold, decryption is refused until you prune to a smaller keep set.
+      In the strong model, that refusal must be enforced by a trusted component with rollback-resistant state.
     </p>
   </section>
 
@@ -202,7 +260,8 @@
   <section class="panel">
     <h2>3. Select chunks to keep</h2>
     <p class="muted">
-      Select the subset you want to preserve. Pruning deletes the in-memory key capsules for all non-selected chunks.
+      Select the subset you want to preserve. In this weak demo, pruning deletes only the in-memory simulated key capsules for non-selected chunks.
+      The strong model instead requires irreversible capsule destruction in a trusted component.
     </p>
     <div id="chunks">No chunks available.</div>
     <div class="button-row">
@@ -311,7 +370,7 @@
 
       return {
         format: formatName,
-        warning: "Browser demo only. Not a secure implementation.",
+        warning: "Weak browser demo only. Strong model requires trusted rollback-resistant state and irreversible capsule destruction.",
         archiveId: archive.archiveId,
         inputName: archive.inputName,
         createdAt: archive.createdAt,

@@ -1,10 +1,31 @@
 # BottleShip Specification
 
-## 1. Terminology
+## 1. Conformance models
+
+This repository describes one state machine instantiated in two different ways.
+
+### Weak browser demo
+
+The browser demo stores ciphertext, manifest, and effective state in ordinary browser-controlled memory and files.
+
+It can demonstrate the intended workflow, but it cannot enforce irreversible destruction, trusted key custody, or rollback resistance.
+
+### Strong-model simulator / proof target
+
+The strong model assumes an idealized **trusted component** that:
+
+- authenticates the current manifest root and version
+- unseals per-chunk keys only for accepted operations
+- irreversibly destroys excluded chunk capsules during prune
+- maintains rollback-resistant authoritative state
+
+All security claims in `SECURITY_PROOF.md` refer to this strong model only.
+
+## 2. Terminology
 
 ### Archive
 
-A sealed collection of encrypted chunks, metadata, key capsules, and policy.
+A sealed collection of encrypted chunks, metadata, key capsules or capsule handles, and policy.
 
 ### Chunk
 
@@ -14,14 +35,18 @@ A byte range of the original input data.
 Di = plaintext chunk
 Ci = encrypted chunk
 ki = chunk encryption key
-Ei = key capsule for ki
+Ei = key capsule or trusted handle for ki
 ```
 
-### Key capsule
+### Trusted component
 
-A sealed object containing or deriving the key material required to decrypt one chunk.
+The idealized component that holds authoritative BottleShip state, controls key unsealing, validates the current authenticated root, and performs irreversible capsule destruction.
 
-In a production system, key capsules should only be opened by a trusted component.
+### Host code
+
+Browser or CLI code outside the trusted component.
+
+Host code may store files, display UI, and request operations, but in the strong model it is not trusted to enforce security properties.
 
 ### Threshold
 
@@ -43,7 +68,7 @@ The destructive operation that invalidates all chunks outside the keep set.
 
 Decryption of only the remaining, non-destroyed chunks.
 
-## 2. Archive structure
+## 3. Archive structure
 
 A BottleShip archive consists of:
 
@@ -61,7 +86,13 @@ archive/
     ...
 ```
 
-## 3. Manifest
+In the weak demo, `state.json` and `capsules/` are only simulated local state.
+
+In the strong model, the authoritative equivalent of `state.json` and capsule validity lives inside the trusted component, even if the host mirrors some metadata for convenience.
+
+## 4. Manifest and state
+
+### 4.1 Manifest
 
 Example:
 
@@ -92,9 +123,9 @@ Example:
 }
 ```
 
-## 4. State
+### 4.2 State
 
-Example:
+Example host-visible state:
 
 ```json
 {
@@ -108,11 +139,19 @@ Example:
 }
 ```
 
-In a weak prototype, this file is local and user-modifiable.
+In the strong model, the trusted component maintains an authenticated root over the current archive state, including at least:
 
-In a strong model, equivalent state must be held by a trusted component and must be rollback-resistant.
+- archive identifier
+- current manifest hash or root
+- live/destroyed chunk set
+- threshold
+- state version or monotonic counter
 
-## 5. Algorithms
+If a host-visible `state.json` exists, it is only a cache or transcript. The trusted component's state is authoritative.
+
+## 5. Operations
+
+The concise idealized operation definitions are expanded in `SECURITY_PROOF.md`. This section states the implementation-facing behavior.
 
 ### 5.1 Seal
 
@@ -128,17 +167,18 @@ Output:
 
 ```text
 BottleShip archive
+initial authenticated state root
 ```
 
 Process:
 
 ```text
 1. Split plaintext into chunks.
-2. Generate a random key for each chunk.
+2. Generate an independent key for each chunk.
 3. Encrypt each chunk with AEAD.
-4. Create a key capsule for each chunk.
-5. Write manifest.
-6. Write initial state.
+4. Create a capsule or trusted handle for each chunk key.
+5. Write manifest and ciphertexts.
+6. Initialize trusted state root and version.
 ```
 
 ### 5.2 Inspect
@@ -147,6 +187,7 @@ Input:
 
 ```text
 archive
+presented root/state
 ```
 
 Output:
@@ -162,10 +203,10 @@ whether decryption is currently allowed
 Process:
 
 ```text
-1. Load manifest.
-2. Load state.
-3. Validate archive_id.
-4. Compute remaining chunk size.
+1. Load manifest and presented state.
+2. Validate archive_id.
+3. Validate the presented state against the trusted current root.
+4. Compute remaining chunk size from the authenticated live set.
 5. Report whether remaining size <= threshold.
 ```
 
@@ -176,28 +217,29 @@ Input:
 ```text
 archive
 keep_set
+presented root/state
 ```
 
 Output:
 
 ```text
-updated archive state
-destroyed or invalidated capsules
+updated trusted state
+new authenticated root
+invalidated excluded capsules
 ```
 
 Process:
 
 ```text
-1. Load manifest and state.
-2. Validate current state.
+1. Load manifest and presented state.
+2. Validate the presented state against the trusted current root.
 3. Compute keep_set size.
 4. If keep_set size > threshold, refuse.
 5. For every chunk not in keep_set:
-   - destroy or invalidate its key capsule
-   - mark chunk as destroyed
+   - irreversibly destroy or invalidate its capsule/handle
+   - mark the chunk as destroyed in trusted state
 6. Increment state version.
-7. Update current manifest hash or state root.
-8. Save updated state.
+7. Commit the new authenticated state root.
 ```
 
 ### 5.4 Decrypt
@@ -206,6 +248,7 @@ Input:
 
 ```text
 archive
+presented root/state
 ```
 
 Output:
@@ -217,66 +260,67 @@ remaining plaintext chunks
 Process:
 
 ```text
-1. Load manifest and state.
-2. Validate current state.
-3. Compute remaining size.
+1. Load manifest and presented state.
+2. Validate the presented state against the trusted current root.
+3. Compute remaining size from the authenticated live set.
 4. If remaining size > threshold, refuse.
 5. For each remaining chunk:
-   - open its key capsule
+   - unseal its key through the trusted component
    - decrypt ciphertext
    - write plaintext output
 6. Refuse destroyed chunks.
 ```
 
-## 6. Security properties
+## 6. Core security properties
+
+These properties are argued only in the strong trusted-state model.
 
 ### Capacity soundness
 
-If the remaining decryptable size is greater than the threshold, decryption is refused.
+If the currently decryptable plaintext size is greater than the threshold, decryption is refused.
 
 ### Residual completeness
 
-If the remaining decryptable size is less than or equal to the threshold, all remaining chunks can be decrypted.
+If the currently decryptable plaintext size is less than or equal to the threshold, every remaining live chunk can be decrypted.
 
 ### Destructive irrecoverability
 
-Destroyed chunks cannot be decrypted from the remaining archive state.
+After an accepted prune, chunks outside the keep set cannot be recovered from the accepted post-prune archive lineage.
 
-In the weak model, this property only holds if the user has not copied the archive or capsules before pruning.
+In the weak model, this fails if the user copied the pre-pruned archive state or capsules beforehand.
 
 ### Rollback resistance
 
-Old archive states must not be accepted after pruning.
+Old authenticated roots or state versions are not accepted after pruning.
 
-This requires trusted state storage. A local prototype cannot enforce this property.
+This requires trusted rollback-resistant state. Ordinary local files cannot enforce it.
 
-### Copy resistance
+### Bounded disclosure
 
-BottleShip cannot prevent copying by itself.
+Aside from public metadata and plaintext intentionally released by accepted decrypt operations, the archive does not reveal additional plaintext about destroyed or still-encrypted chunks.
 
-Copy resistance requires trusted hardware, remote custody, or another external enforcement mechanism.
+This property depends on AEAD security, authenticated metadata, trusted key unsealing, and the absence of a pre-prune copy from inside the trusted component.
 
 ## 7. Non-goals
 
 BottleShip does not attempt to:
 
-- prevent copying in a normal file system
-- protect against malicious browsers
-- provide DRM
-- protect against compromised trusted hardware
-- make deleted plaintext disappear from previously exported outputs
-- replace legal or organizational access controls
+- prevent copying in a normal filesystem
+- protect against malicious browsers or modified JavaScript
+- prove the security of arbitrary hardware by documentation alone
+- provide DRM after plaintext has been released
+- recover plaintext from destroyed chunks
+- replace legal, organizational, or system access controls
 
 ## 8. Production requirements
 
-A production implementation requires:
+A production implementation requires at least:
 
-- HSM, TPM, TEE, or remote trusted service
+- a trusted component such as an HSM, TPM-backed service, TEE with anti-rollback state, or remote trusted service
+- authenticated manifest roots and metadata binding
+- trusted key unsealing for live chunks only
+- irreversible capsule destruction or equivalent key invalidation
 - monotonic counter or equivalent anti-rollback state
-- authenticated manifest roots
-- secure deletion of key capsules
-- AEAD misuse resistance review
-- side-channel review
-- audit logging
-- recovery policy
-- key rotation policy
+- AEAD misuse review and key-separation review
+- audit logging and failure semantics
+- explicit recovery and key-rotation policy
