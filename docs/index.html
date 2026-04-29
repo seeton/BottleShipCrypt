@@ -2,327 +2,728 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>BottleShip Weak-Model Demo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BottleShip Weak-Model Browser Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
   <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
     :root {
-      color-scheme: light;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color-scheme: dark;
+      --ocean: #050d1a;
+      --deep: #081224;
+      --abyss: #030813;
+      --panel: rgba(8, 20, 40, 0.84);
+      --panel-soft: rgba(11, 28, 53, 0.7);
+      --glass: rgba(45, 160, 130, 0.18);
+      --glass-edge: rgba(100, 220, 190, 0.46);
+      --gold: #c9a84c;
+      --gold-glow: #f4c84a;
+      --sea: #2de8b0;
+      --sea-dim: #1a8a6a;
+      --amber: #e8832a;
+      --lavender: #a88cff;
+      --danger: #e84a2a;
+      --danger-soft: #ff8a73;
+      --text: #d4e4f2;
+      --text-dim: #7891a8;
+      --line: rgba(110, 180, 220, 0.14);
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+    }
+
+    html, body {
+      min-height: 100%;
     }
 
     body {
-      max-width: 980px;
-      margin: 40px auto;
-      padding: 0 20px 48px;
-      line-height: 1.5;
-      color: #111827;
-      background: #f9fafb;
+      margin: 0;
+      background:
+        radial-gradient(ellipse 75% 48% at 50% 100%, rgba(10, 54, 94, 0.62) 0%, transparent 70%),
+        radial-gradient(circle at 15% 12%, rgba(49, 98, 148, 0.22) 0%, transparent 30%),
+        linear-gradient(180deg, #07111f 0%, #040914 52%, #02060e 100%);
+      color: var(--text);
+      font-family: 'Courier Prime', monospace;
+      line-height: 1.55;
+      overflow-x: hidden;
     }
 
-    h1, h2 {
-      line-height: 1.2;
+    a {
+      color: var(--sea);
     }
 
-    p {
-      margin: 0.5rem 0 1rem;
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 14%, rgba(220, 236, 255, 0.56) 0%, transparent 100%),
+        radial-gradient(1px 1px at 28% 10%, rgba(220, 236, 255, 0.34) 0%, transparent 100%),
+        radial-gradient(1px 1px at 48% 6%, rgba(220, 236, 255, 0.48) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 16%, rgba(220, 236, 255, 0.38) 0%, transparent 100%),
+        radial-gradient(1px 1px at 86% 9%, rgba(220, 236, 255, 0.48) 0%, transparent 100%),
+        radial-gradient(1px 1px at 20% 34%, rgba(220, 236, 255, 0.22) 0%, transparent 100%),
+        radial-gradient(1px 1px at 82% 38%, rgba(220, 236, 255, 0.26) 0%, transparent 100%);
+      opacity: 0.95;
+    }
+
+    .waves {
+      position: fixed;
+      inset: auto 0 0 0;
+      height: 130px;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .waves svg {
+      position: absolute;
+      bottom: 0;
+      width: 200%;
+      animation: waveSlide 14s linear infinite;
+    }
+
+    .waves svg:nth-child(2) {
+      animation-duration: 19s;
+      animation-direction: reverse;
+      opacity: 0.42;
+    }
+
+    @keyframes waveSlide {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    .layout {
+      position: relative;
+      z-index: 1;
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 18px 18px 56px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 22px;
+      border: 1px solid rgba(113, 183, 223, 0.18);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(12, 28, 52, 0.85), rgba(7, 18, 37, 0.72));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .header-anchor {
+      font-size: 30px;
+      line-height: 1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+      color: var(--text-dim);
+      font-size: 0.74rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .header-title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      letter-spacing: 0.12em;
+      color: var(--gold-glow);
+      text-shadow: 0 0 22px rgba(201, 168, 76, 0.28);
+    }
+
+    .header-subtitle {
+      margin-top: 4px;
+      font-size: 0.83rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .phase-badge {
+      margin-left: auto;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(120, 145, 168, 0.55);
+      font-size: 0.76rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 700;
+      white-space: nowrap;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .phase-idle {
+      color: var(--text-dim);
+      border-color: rgba(120, 145, 168, 0.45);
+    }
+
+    .phase-busy {
+      color: var(--gold-glow);
+      border-color: rgba(232, 131, 42, 0.78);
+      box-shadow: 0 0 18px rgba(232, 131, 42, 0.22);
+    }
+
+    .phase-sealed {
+      color: var(--amber);
+      border-color: rgba(232, 131, 42, 0.66);
+      box-shadow: 0 0 18px rgba(232, 131, 42, 0.18);
+    }
+
+    .phase-pruned {
+      color: var(--sea);
+      border-color: rgba(45, 232, 176, 0.6);
+      box-shadow: 0 0 18px rgba(45, 232, 176, 0.18);
+    }
+
+    .phase-decrypted {
+      color: #92ffca;
+      border-color: rgba(125, 255, 195, 0.72);
+      box-shadow: 0 0 18px rgba(125, 255, 195, 0.2);
+    }
+
+    .hero-grid,
+    .main-grid,
+    .lower-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .hero-grid {
+      grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr);
+    }
+
+    .main-grid {
+      grid-template-columns: minmax(280px, 330px) minmax(380px, 1fr) minmax(320px, 380px);
+      align-items: stretch;
+    }
+
+    .lower-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .panel,
+    .output-bar {
+      background: linear-gradient(180deg, rgba(11, 28, 53, 0.88), rgba(6, 15, 31, 0.82));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
     }
 
     .panel {
-      background: #ffffff;
-      border: 1px solid #d1d5db;
-      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(113, 183, 223, 0.12);
+      font-family: 'Cinzel', serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .panel-body {
       padding: 18px;
-      margin: 18px 0;
-      box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 0;
     }
 
-    .warning {
-      border-color: #b45309;
-      background: #fffbeb;
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
-    .comparison-grid {
-      display: grid;
-      gap: 12px;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    }
-
-    .comparison-card {
-      padding: 14px;
-      border: 1px solid #d1d5db;
-      border-radius: 10px;
-      background: #f9fafb;
-    }
-
-    .comparison-card h3 {
-      margin: 0 0 0.5rem;
-      font-size: 1rem;
-    }
-
-    .comparison-card ul {
-      margin: 0;
-      padding-left: 1.25rem;
-    }
-
-    .grid {
-      display: grid;
-      gap: 12px;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    }
-
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 6px;
+    .field label,
+    .field-legend {
+      font-size: 0.74rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-dim);
     }
 
     input[type="file"],
     input[type="number"] {
       width: 100%;
-      box-sizing: border-box;
-      padding: 10px 12px;
+      padding: 11px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(113, 183, 223, 0.18);
+      background: rgba(3, 8, 19, 0.82);
+      color: var(--text);
       font: inherit;
-      border: 1px solid #9ca3af;
-      border-radius: 8px;
-      background: #ffffff;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
     }
 
-    .button-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    button {
-      padding: 10px 14px;
+    input[type="file"]::file-selector-button {
+      margin-right: 12px;
+      padding: 8px 12px;
+      border: 1px solid rgba(45, 232, 176, 0.3);
+      border-radius: 999px;
+      background: rgba(45, 232, 176, 0.12);
+      color: var(--sea);
       font: inherit;
-      border: 1px solid #1f2937;
-      border-radius: 8px;
-      background: #111827;
-      color: #ffffff;
       cursor: pointer;
     }
 
-    button.secondary {
-      background: #ffffff;
-      color: #111827;
+    input[type="file"]:focus,
+    input[type="number"]:focus {
+      border-color: rgba(45, 232, 176, 0.42);
+      box-shadow: 0 0 0 3px rgba(45, 232, 176, 0.12);
     }
 
-    button:disabled {
-      cursor: not-allowed;
-      opacity: 0.45;
+    .file-meta,
+    .subtle-text,
+    .muted {
+      color: var(--text-dim);
+      font-size: 0.88rem;
     }
 
-    .chunk {
+    .note-box,
+    .warning-box,
+    .success-box {
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    .note-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(113, 183, 223, 0.12);
+      color: var(--text-dim);
+    }
+
+    .warning-box {
+      background: rgba(232, 74, 42, 0.08);
+      border: 1px solid rgba(232, 74, 42, 0.24);
+      color: #ffc0b4;
+    }
+
+    .success-box {
+      background: rgba(45, 232, 176, 0.08);
+      border: 1px solid rgba(45, 232, 176, 0.24);
+      color: #b6ffe5;
+    }
+
+    .comparison-grid,
+    .status-grid,
+    .flow-grid,
+    .chunk-card-grid {
       display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 10px;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid #e5e7eb;
+      gap: 12px;
     }
 
-    .chunk:last-child {
-      border-bottom: 0;
-    }
-
+    .comparison-grid,
     .status-grid {
-      display: grid;
-      gap: 10px;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     }
 
-    .status-card {
-      padding: 12px;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      background: #f9fafb;
+    .flow-grid {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .comparison-card,
+    .status-card,
+    .flow-step,
+    .chunk-card {
+      border-radius: 16px;
+      border: 1px solid rgba(113, 183, 223, 0.12);
+      background: rgba(255, 255, 255, 0.03);
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .comparison-card h3,
+    .flow-step h3,
+    .chunk-card h3 {
+      margin: 0 0 8px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.98rem;
+      letter-spacing: 0.04em;
+    }
+
+    .comparison-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--text-dim);
+    }
+
+    .comparison-card li + li {
+      margin-top: 6px;
     }
 
     .status-card strong {
       display: block;
-      margin-bottom: 4px;
-    }
-
-    .allowed {
-      color: #166534;
-      font-weight: 700;
-    }
-
-    .refused {
-      color: #991b1b;
-      font-weight: 700;
-    }
-
-    pre {
-      margin: 0;
-      padding: 16px;
-      overflow: auto;
-      white-space: pre-wrap;
+      margin-top: 4px;
+      font-size: 1.05rem;
+      color: var(--text);
       word-break: break-word;
-      border-radius: 10px;
-      background: #111827;
-      color: #f9fafb;
     }
 
-    code {
-      background: #e5e7eb;
-      padding: 2px 6px;
-      border-radius: 6px;
+    .status-label {
+      color: var(--text-dim);
+      font-size: 0.74rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
     }
 
-    .muted {
-      color: #4b5563;
+    .tone-good {
+      color: #9dffd8;
     }
 
-    h3 {
-      margin: 0 0 0.6rem;
-      font-size: 1rem;
+    .tone-warn {
+      color: #ffbf8a;
     }
 
-    .visualization-stack {
-      display: grid;
-      gap: 18px;
+    .tone-danger {
+      color: #ff8b76;
     }
 
-    .visual-grid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    .hero-copy p,
+    .flow-detail,
+    .flow-meta,
+    .chunk-card p {
+      margin: 0;
     }
 
-    .visual-empty {
-      padding: 14px;
-      border: 1px dashed #cbd5e1;
-      border-radius: 10px;
-      background: #f8fafc;
-      color: #475569;
+    .flow-detail {
+      color: var(--text);
+      margin-top: 8px;
     }
 
-    .flow-diagram {
-      display: grid;
-      gap: 12px;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    .flow-meta {
+      margin-top: 8px;
+      color: var(--text-dim);
+      font-size: 0.84rem;
     }
 
-    .flow-step {
-      padding: 14px;
-      border: 1px solid #d1d5db;
-      border-radius: 12px;
-      background: #f9fafb;
-    }
-
-    .flow-step h3 {
-      margin-bottom: 0.35rem;
-    }
-
-    .step-badge {
+    .step-badge,
+    .chip,
+    .legend-chip {
       display: inline-flex;
       align-items: center;
-      padding: 4px 8px;
-      margin-bottom: 8px;
+      gap: 6px;
+      padding: 4px 10px;
       border-radius: 999px;
-      font-size: 0.8rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
       font-weight: 700;
     }
 
-    .step-badge-neutral,
-    .chip-neutral {
-      background: #e5e7eb;
-      color: #374151;
+    .step-neutral,
+    .chip-neutral,
+    .legend-chip-neutral {
+      background: rgba(120, 145, 168, 0.14);
+      color: #c3d6e6;
     }
 
-    .step-badge-pending,
+    .step-pending,
     .chip-pending {
-      background: #dbeafe;
-      color: #1d4ed8;
+      background: rgba(232, 131, 42, 0.16);
+      color: #ffc28b;
     }
 
-    .step-badge-success,
-    .chip-success {
-      background: #dcfce7;
-      color: #166534;
+    .step-success,
+    .chip-success,
+    .legend-chip-success {
+      background: rgba(45, 232, 176, 0.14);
+      color: #afffe0;
     }
 
-    .step-badge-danger,
-    .chip-danger {
-      background: #fee2e2;
-      color: #991b1b;
+    .step-danger,
+    .chip-danger,
+    .legend-chip-danger {
+      background: rgba(232, 74, 42, 0.14);
+      color: #ffb7aa;
     }
 
-    .step-detail {
-      color: #1f2937;
+    .chip-decryptable,
+    .legend-chip-decryptable {
+      background: rgba(168, 140, 255, 0.16);
+      color: #d5c8ff;
     }
 
-    .step-meta {
-      margin-top: 8px;
-      color: #6b7280;
-      font-size: 0.85rem;
+    .button-row,
+    .button-stack,
+    .select-all-row,
+    .stats-row,
+    .legend,
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
-    .metric-copy {
-      margin-bottom: 10px;
-      color: #1f2937;
+    .button-stack {
+      margin-top: auto;
+    }
+
+    .btn {
+      appearance: none;
+      border-radius: 999px;
+      border: 1px solid;
+      padding: 10px 16px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.82rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.36;
+    }
+
+    .btn-primary {
+      background: rgba(201, 168, 76, 0.16);
+      border-color: rgba(244, 200, 74, 0.64);
+      color: var(--gold-glow);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      box-shadow: 0 0 20px rgba(201, 168, 76, 0.22);
+      background: rgba(201, 168, 76, 0.24);
+    }
+
+    .btn-sea {
+      background: rgba(45, 232, 176, 0.12);
+      border-color: rgba(45, 232, 176, 0.38);
+      color: var(--sea);
+    }
+
+    .btn-sea:hover:not(:disabled) {
+      box-shadow: 0 0 20px rgba(45, 232, 176, 0.2);
+      background: rgba(45, 232, 176, 0.18);
+    }
+
+    .btn-danger {
+      background: rgba(232, 74, 42, 0.12);
+      border-color: rgba(232, 74, 42, 0.36);
+      color: var(--danger-soft);
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      box-shadow: 0 0 20px rgba(232, 74, 42, 0.18);
+      background: rgba(232, 74, 42, 0.18);
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.02);
+      border-color: rgba(113, 183, 223, 0.18);
+      color: var(--text-dim);
+    }
+
+    .btn-ghost:hover:not(:disabled) {
+      border-color: rgba(113, 183, 223, 0.32);
+      color: var(--text);
+    }
+
+    .phase-lead {
+      text-align: center;
+      color: var(--text-dim);
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .bottle-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      min-height: 100%;
+    }
+
+    .bottle-svg-shell {
+      width: min(100%, 420px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 8px 0;
+    }
+
+    .bottle-svg-shell svg {
+      width: min(100%, 280px);
+      height: auto;
+      display: block;
+    }
+
+    .bottle-caption {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.84rem;
+    }
+
+    .threshold-wrap {
+      width: min(100%, 420px);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
     .meter-shell {
       position: relative;
-      height: 24px;
-      overflow: hidden;
+      height: 26px;
       border-radius: 999px;
-      background: #e5e7eb;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(113, 183, 223, 0.14);
     }
 
     .meter-fill {
       position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
+      inset: 0 auto 0 0;
       border-radius: 999px;
     }
 
     .meter-fill-remaining {
-      background: linear-gradient(90deg, #93c5fd, #2563eb);
+      background: linear-gradient(90deg, rgba(232, 131, 42, 0.65), rgba(232, 131, 42, 0.95));
     }
 
     .meter-fill-selected {
       z-index: 2;
-      background: linear-gradient(90deg, #86efac, #16a34a);
+      background: linear-gradient(90deg, rgba(45, 232, 176, 0.7), rgba(45, 232, 176, 0.98));
+      box-shadow: 0 0 20px rgba(45, 232, 176, 0.22);
     }
 
     .threshold-marker {
       position: absolute;
-      top: -3px;
-      bottom: -3px;
-      z-index: 3;
+      inset: -4px auto -4px 0;
       width: 3px;
       border-radius: 999px;
-      background: #b45309;
+      background: var(--lavender);
+      box-shadow: 0 0 14px rgba(168, 140, 255, 0.7);
+      z-index: 3;
+    }
+
+    .threshold-marker::after {
+      content: 'T';
+      position: absolute;
+      top: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #d9cdff;
+      font-size: 0.72rem;
+      font-weight: 700;
     }
 
     .meter-scale {
       display: flex;
       justify-content: space-between;
-      margin-top: 8px;
-      color: #6b7280;
-      font-size: 0.85rem;
+      gap: 12px;
+      color: var(--text-dim);
+      font-size: 0.82rem;
     }
 
-    .viz-legend,
-    .chip-row {
+    .archive-strip {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px 12px;
-      margin-top: 10px;
+      align-items: stretch;
+      gap: 8px;
+      min-height: 108px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .archive-segment {
+      min-width: 82px;
+      flex-basis: 0;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .archive-segment strong {
+      font-size: 0.9rem;
+    }
+
+    .archive-segment small {
+      color: var(--text-dim);
+    }
+
+    .archive-segment.segment-interactive {
+      cursor: pointer;
+    }
+
+    .archive-segment.segment-interactive:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    .segment-available {
+      background: rgba(232, 131, 42, 0.08);
+      border-color: rgba(232, 131, 42, 0.24);
+    }
+
+    .segment-keep {
+      background: rgba(45, 232, 176, 0.08);
+      border-color: rgba(45, 232, 176, 0.28);
+    }
+
+    .segment-decryptable {
+      background: rgba(168, 140, 255, 0.1);
+      border-color: rgba(168, 140, 255, 0.32);
+    }
+
+    .segment-pruned {
+      background: rgba(232, 74, 42, 0.08);
+      border-color: rgba(232, 74, 42, 0.22);
+      opacity: 0.72;
+    }
+
+    .archive-segment.selected {
+      outline: 1px solid rgba(45, 232, 176, 0.42);
+      box-shadow: inset 0 0 0 1px rgba(45, 232, 176, 0.18);
+    }
+
+    .legend {
+      align-items: center;
+      color: var(--text-dim);
+      font-size: 0.82rem;
     }
 
     .legend-item {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      color: #4b5563;
-      font-size: 0.85rem;
     }
 
     .legend-swatch {
@@ -332,261 +733,581 @@
       display: inline-block;
     }
 
-    .swatch-remaining {
-      background: #2563eb;
-    }
+    .swatch-available { background: var(--amber); }
+    .swatch-keep { background: var(--sea); }
+    .swatch-decryptable { background: var(--lavender); }
+    .swatch-pruned { background: var(--danger); }
+    .swatch-threshold { background: var(--lavender); }
 
-    .swatch-selected {
-      background: #16a34a;
-    }
-
-    .swatch-threshold {
-      background: #b45309;
-    }
-
-    .swatch-available {
-      background: #93c5fd;
-    }
-
-    .swatch-keep {
-      background: #86efac;
-    }
-
-    .swatch-decryptable {
-      background: #c4b5fd;
-    }
-
-    .swatch-pruned {
-      background: #fca5a5;
-    }
-
-    .archive-strip {
-      display: flex;
-      gap: 6px;
-      align-items: stretch;
-      min-height: 82px;
-    }
-
-    .archive-segment {
-      min-width: 58px;
-      flex-basis: 0;
-      padding: 10px 8px;
-      border: 1px solid transparent;
-      border-radius: 10px;
+    .chunk-list {
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      gap: 4px;
+      gap: 8px;
+      min-height: 180px;
+      max-height: 440px;
+      overflow-y: auto;
+      padding-right: 2px;
     }
 
-    .archive-segment strong {
-      font-size: 0.85rem;
+    .chunk-item {
+      appearance: none;
+      font: inherit;
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid rgba(113, 183, 223, 0.12);
+      background: rgba(255, 255, 255, 0.03);
+      color: inherit;
+      padding: 11px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, opacity 0.18s ease;
     }
 
-    .archive-segment small {
-      color: #374151;
+    .chunk-item:not(:disabled) {
+      cursor: pointer;
     }
 
-    .segment-available {
-      background: #dbeafe;
-      border-color: #93c5fd;
+    .chunk-item:not(:disabled):hover {
+      transform: translateY(-1px);
     }
 
-    .segment-keep {
-      background: #dcfce7;
-      border-color: #86efac;
+    .chunk-item:disabled {
+      cursor: default;
     }
 
-    .segment-decryptable {
-      background: #ede9fe;
-      border-color: #c4b5fd;
+    .chunk-item.available {
+      background: rgba(232, 131, 42, 0.08);
+      border-color: rgba(232, 131, 42, 0.22);
     }
 
-    .segment-pruned {
-      background: #fee2e2;
-      border-color: #fca5a5;
+    .chunk-item.keep {
+      background: rgba(45, 232, 176, 0.08);
+      border-color: rgba(45, 232, 176, 0.3);
     }
 
-    .chunk-visual-grid {
-      display: grid;
-      gap: 12px;
+    .chunk-item.decryptable {
+      background: rgba(168, 140, 255, 0.1);
+      border-color: rgba(168, 140, 255, 0.3);
+    }
+
+    .chunk-item.pruned {
+      background: rgba(255, 255, 255, 0.02);
+      border-color: rgba(255, 255, 255, 0.08);
+      opacity: 0.52;
+    }
+
+    .chunk-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+    }
+
+    .chunk-item.available .chunk-dot { background: var(--amber); box-shadow: 0 0 12px rgba(232, 131, 42, 0.45); }
+    .chunk-item.keep .chunk-dot { background: var(--sea); box-shadow: 0 0 12px rgba(45, 232, 176, 0.46); }
+    .chunk-item.decryptable .chunk-dot { background: var(--lavender); box-shadow: 0 0 12px rgba(168, 140, 255, 0.42); }
+    .chunk-item.pruned .chunk-dot { background: #576678; box-shadow: none; }
+
+    .chunk-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .chunk-idx {
+      color: var(--text-dim);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .chunk-bytes {
+      margin-top: 3px;
+      color: var(--text);
+      font-size: 0.92rem;
+    }
+
+    .chunk-status {
+      margin-top: 3px;
+      color: var(--text-dim);
+      font-size: 0.78rem;
+    }
+
+    .chunk-capsule {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 1px solid rgba(113, 183, 223, 0.14);
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    .chunk-card-grid {
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
 
-    .chunk-card-visual {
-      border: 1px solid #d1d5db;
-      border-radius: 12px;
-      padding: 14px;
-      background: #ffffff;
+    .chunk-card {
+      background: rgba(255, 255, 255, 0.03);
     }
 
-    .chunk-card-visual.segment-available {
-      background: #eff6ff;
+    .chunk-card.available {
+      border-color: rgba(232, 131, 42, 0.18);
     }
 
-    .chunk-card-visual.segment-keep {
-      background: #f0fdf4;
+    .chunk-card.keep {
+      border-color: rgba(45, 232, 176, 0.22);
     }
 
-    .chunk-card-visual.segment-decryptable {
-      background: #f5f3ff;
+    .chunk-card.decryptable {
+      border-color: rgba(168, 140, 255, 0.22);
     }
 
-    .chunk-card-visual.segment-pruned {
-      background: #fef2f2;
+    .chunk-card.pruned {
+      border-color: rgba(232, 74, 42, 0.18);
     }
 
     .chunk-card-header {
       display: flex;
       justify-content: space-between;
-      gap: 8px;
-      align-items: baseline;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 10px;
     }
 
-    .chunk-card-header strong {
-      font-size: 0.95rem;
-    }
-
-    .chip {
-      display: inline-flex;
-      align-items: center;
-      padding: 3px 8px;
-      border-radius: 999px;
+    pre {
+      margin: 0;
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(3, 8, 19, 0.86);
+      border: 1px solid rgba(113, 183, 223, 0.12);
+      color: #dce9f6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow: auto;
+      max-height: 420px;
       font-size: 0.8rem;
-      font-weight: 600;
+    }
+
+    .output-bar {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 18px;
+    }
+
+    .output-label {
+      padding-top: 3px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.82rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    .output-message {
+      flex: 1;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .output-idle {
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    .output-info {
+      color: #dce9f6;
+    }
+
+    .output-success {
+      color: #9dffd8;
+      text-shadow: 0 0 10px rgba(45, 232, 176, 0.16);
+    }
+
+    .output-danger {
+      color: #ffb6a7;
+      text-shadow: 0 0 10px rgba(232, 74, 42, 0.14);
+    }
+
+    .empty-state {
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px dashed rgba(113, 183, 223, 0.16);
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-dim);
+    }
+
+    .stats-row {
+      justify-content: center;
+    }
+
+    .stat {
+      min-width: 120px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(113, 183, 223, 0.12);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .stat-value {
+      font-family: 'Cinzel', serif;
+      font-size: 1.15rem;
+      color: var(--gold-glow);
+    }
+
+    .stat-label {
+      margin-top: 4px;
+      color: var(--text-dim);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .bottle-chunk-seg {
+      transition: opacity 0.5s ease, transform 0.4s ease, filter 0.3s ease;
+      transform-origin: center;
+    }
+
+    .bottle-chunk-seg.pruning {
+      animation: shatter 0.52s ease-out forwards;
+    }
+
+    .bottle-chunk-seg.sealing {
+      animation: sealDrop 0.42s ease-out both;
+    }
+
+    .bottle-glass {
+      filter: drop-shadow(0 8px 28px rgba(45, 200, 160, 0.14));
+    }
+
+    .decrypted-glow {
+      animation: decryptPulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes shatter {
+      0% { opacity: 1; transform: scale(1); }
+      40% { opacity: 0.8; transform: scale(1.08) translateY(-4px); filter: brightness(2); }
+      100% { opacity: 0; transform: scale(0.3) translateY(20px); }
+    }
+
+    @keyframes sealDrop {
+      from { opacity: 0; transform: translateY(-28px) scale(0.84); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes decryptPulse {
+      0%, 100% { filter: drop-shadow(0 0 6px rgba(125, 255, 195, 0.52)); }
+      50% { filter: drop-shadow(0 0 18px rgba(125, 255, 195, 0.9)); }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(113, 183, 223, 0.18);
+      border-radius: 999px;
+    }
+
+    @media (max-width: 1260px) {
+      .main-grid {
+        grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+      }
+
+      .main-grid > :nth-child(3) {
+        grid-column: 1 / -1;
+      }
+
+      .lower-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .lower-grid > :last-child {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid,
+      .main-grid,
+      .lower-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header {
+        flex-wrap: wrap;
+      }
+
+      .phase-badge {
+        margin-left: 0;
+      }
+
+      .output-bar {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>BottleShip Weak-Model Browser Demo</h1>
-  <p>
-    This page visualizes BottleShip mechanics in a weak browser model.
-    It is useful for learning the flow, but it is not the strong model and must not be treated as a secure implementation.
-  </p>
+  <div class="stars"></div>
+  <div class="waves">
+    <svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="height: 82px;">
+      <path d="M0,60 C240,100 480,20 720,60 C960,100 1200,20 1440,60 L1440,120 L0,120 Z" fill="rgba(5,20,50,0.64)"></path>
+    </svg>
+    <svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="height: 82px;">
+      <path d="M0,40 C360,90 720,10 1080,50 C1260,70 1380,30 1440,40 L1440,120 L0,120 Z" fill="rgba(5,30,60,0.54)"></path>
+    </svg>
+  </div>
 
-  <section class="panel warning">
-    <strong>Unsafe for real secrets: weak-model visualization only.</strong>
-    <p>
-      The browser demo cannot enforce irreversible capsule destruction, rollback-resistant state, trusted key custody, or copy resistance.
-      A user can inspect or modify the JavaScript, duplicate the archive state, or restore an earlier snapshot.
-      The in-memory key capsules shown here are only a teaching aid.
-    </p>
-    <p>
-      The strong BottleShip model requires a trusted component that holds state outside user control, rejects rollback, and destroys capsules irreversibly.
-      For the current non-browser simulator path, use the Go CLI at the repository root in
-      <a href="https://github.com/seeton/BottleShipCrypt/tree/main/cmd/bship"><code>cmd/bship</code></a>.
-      The <a href="https://github.com/seeton/BottleShipCrypt/tree/main/prototype"><code>prototype/</code></a> directory is reserved for future prototype notes and strong-model work only; it does not contain the current simulator implementation.
-    </p>
-  </section>
-
-  <section class="panel">
-    <h2>Weak demo vs. strong trusted-state model</h2>
-    <div class="comparison-grid">
-      <div class="comparison-card">
-        <h3>Weak browser demo</h3>
-        <ul>
-          <li>Runs entirely in user-controlled JavaScript.</li>
-          <li>Stores simulated capsules only in browser memory.</li>
-          <li>Can illustrate threshold refusal and prune flow.</li>
-          <li>Cannot stop copying, rollback, or code tampering.</li>
-        </ul>
-      </div>
-      <div class="comparison-card">
-        <h3>Strong trusted-state model</h3>
-        <ul>
-          <li>Uses a trusted component to hold capsule/state custody.</li>
-          <li>Requires rollback-resistant state across operations.</li>
-          <li>Must perform irreversible capsule destruction when pruning.</li>
-          <li>Is the path to evaluate for real security claims.</li>
-        </ul>
-      </div>
-    </div>
-    <p class="muted">
-      Keep using this page to explore the weak model only. For the current non-browser simulator path, use the Go CLI at the repository root in <code>cmd/bship</code>; <code>prototype/</code> remains future work.
-    </p>
-  </section>
-
-  <section class="panel">
-    <h2>1. Seal file</h2>
-    <div class="grid">
+  <div class="layout">
+    <header class="header">
+      <div class="header-anchor">⚓</div>
       <div>
-        <label for="fileInput">Input file</label>
-        <input id="fileInput" type="file">
+        <div class="eyebrow">Maritime browser demonstration · weak model only</div>
+        <div class="header-title">BottleShip Crypt</div>
+        <div class="header-subtitle">Capacity-bounded destructive residual decryption · Browser teaching view</div>
       </div>
-      <div>
-        <label for="thresholdInput">Threshold bytes</label>
-        <input id="thresholdInput" type="number" value="1048576" min="1" step="1">
-      </div>
-      <div>
-        <label for="chunkSizeInput">Chunk size bytes</label>
-        <input id="chunkSizeInput" type="number" value="262144" min="1024" step="1">
-      </div>
-    </div>
-    <div class="button-row">
-      <button id="sealButton">Seal</button>
-      <button id="resetButton" class="secondary">Reset demo</button>
-    </div>
-    <p class="muted">
-      If the remaining decryptable bytes exceed the threshold, decryption is refused until you prune to a smaller keep set.
-      In the strong model, that refusal must be enforced by a trusted component with rollback-resistant state.
-    </p>
-  </section>
+      <div id="phaseBadge" class="phase-badge phase-idle">Idle</div>
+    </header>
 
-  <section class="panel">
-    <h2>2. Archive status</h2>
-    <div id="status">No archive sealed.</div>
-  </section>
-
-  <section class="panel">
-    <h2>3. Weak-model state visualization</h2>
-    <p class="muted">
-      Teaching view only: these chunk capsules, colors, and transitions exist only in browser memory. They illustrate the weak model; they do not provide trusted destruction or rollback resistance.
-    </p>
-    <div class="visualization-stack">
-      <div id="flowDiagram" class="flow-diagram"></div>
-      <div class="visual-grid">
-        <div>
-          <h3>Threshold vs. remaining bytes</h3>
-          <div id="thresholdSummary" class="metric-copy">Seal a file to see the threshold meter.</div>
-          <div id="thresholdMeter" class="visual-empty">No archive loaded.</div>
+    <section class="hero-grid">
+      <section class="panel">
+        <div class="panel-header">⚠ Weak-model warning</div>
+        <div class="panel-body hero-copy">
+          <div class="warning-box">
+            <strong>Unsafe for real secrets: this is a weak-model visualization only.</strong>
+            The browser cannot enforce irreversible capsule destruction, rollback-resistant state, trusted key custody, or copy resistance.
+            A user can inspect or modify the JavaScript, duplicate archive state, or replay an earlier snapshot.
+          </div>
+          <p>
+            Use this page to understand the BottleShip flow only. For the current non-browser simulator path, use the Go CLI in
+            <a href="https://github.com/seeton/BottleShipCrypt/tree/main/cmd/bship"><code>cmd/bship</code></a>.
+            The <a href="https://github.com/seeton/BottleShipCrypt/tree/main/prototype"><code>prototype/</code></a> directory remains reserved for future prototype notes and stronger-model work.
+          </p>
+          <div class="comparison-grid">
+            <div class="comparison-card">
+              <h3>Weak browser demo</h3>
+              <ul>
+                <li>Runs entirely in user-controlled JavaScript.</li>
+                <li>Simulates chunk capsules only in browser memory.</li>
+                <li>Can illustrate threshold refusal, keep-set selection, and prune flow.</li>
+                <li>Cannot stop copying, rollback, or code tampering.</li>
+              </ul>
+            </div>
+            <div class="comparison-card">
+              <h3>Strong trusted-state model</h3>
+              <ul>
+                <li>Needs a trusted component to hold capsule and state custody.</li>
+                <li>Requires rollback-resistant state across operations.</li>
+                <li>Must irreversibly destroy capsules when pruning.</li>
+                <li>Is the only path for meaningful security claims.</li>
+              </ul>
+            </div>
+          </div>
         </div>
-        <div>
-          <h3>Archive byte map</h3>
-          <div id="archiveMap" class="visual-empty">Chunk layout appears after sealing.</div>
-        </div>
-      </div>
-      <div>
-        <h3>Chunk + capsule state</h3>
-        <div id="chunkVisualization" class="chunk-visual-grid">
-          <div class="visual-empty">Seal a file to inspect simulated capsules and decryptability.</div>
-        </div>
-      </div>
-    </div>
-  </section>
+      </section>
 
-  <section class="panel">
-    <h2>4. Select chunks to keep</h2>
-    <p class="muted">
-      Select the subset you want to preserve. In this weak demo, pruning deletes only the in-memory simulated key capsules for non-selected chunks.
-      The strong model instead requires irreversible capsule destruction in a trusted component.
-    </p>
-    <div id="chunks">No chunks available.</div>
-    <div class="button-row">
-      <button id="pruneButton" disabled>Prune non-selected chunks</button>
-      <button id="decryptButton" disabled>Decrypt remaining chunks</button>
-      <button id="manifestButton" class="secondary" disabled>Export manifest JSON</button>
-    </div>
-  </section>
+      <section class="panel">
+        <div class="panel-header">🧭 Voyage status</div>
+        <div class="panel-body">
+          <div id="statusCards" class="status-grid"></div>
+          <div id="guidanceBanner" class="note-box"></div>
+        </div>
+      </section>
+    </section>
 
-  <section class="panel">
-    <h2>5. Manifest</h2>
-    <pre id="manifestView">{}</pre>
-  </section>
+    <section class="main-grid">
+      <section class="panel">
+        <div class="panel-header">⚗ Seal & configure</div>
+        <div class="panel-body">
+          <div class="field">
+            <label for="fileInput">Input file</label>
+            <input id="fileInput" type="file">
+            <div id="fileMeta" class="file-meta">No file chosen.</div>
+          </div>
+
+          <div class="field">
+            <label for="thresholdInput">Threshold bytes</label>
+            <input id="thresholdInput" type="number" value="1048576" min="1" step="1">
+          </div>
+
+          <div class="field">
+            <label for="chunkSizeInput">Chunk size bytes</label>
+            <input id="chunkSizeInput" type="number" value="262144" min="1024" step="1">
+          </div>
+
+          <div class="note-box">
+            Seal a file into individually encrypted chunks. If the remaining decryptable bytes stay above the threshold,
+            decryption is refused until the residual archive is pruned smaller. In a strong model, that refusal must come from a trusted, rollback-resistant component—not this page.
+          </div>
+
+          <div class="button-row">
+            <button id="sealButton" class="btn btn-primary">Seal bottle</button>
+            <button id="resetButton" class="btn btn-ghost">Reset demo</button>
+          </div>
+
+          <div class="subtle-text">Draft input changes apply the next time you seal. Reset clears the current archive and the selected file.</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">🫙 BottleShip state vessel</div>
+        <div class="panel-body bottle-stage">
+          <div id="phaseLead" class="phase-lead"></div>
+          <div id="bottleSvg" class="bottle-svg-shell"></div>
+          <div id="bottleCaption" class="bottle-caption"></div>
+          <div id="thresholdWrap" class="threshold-wrap"></div>
+          <div id="bottleStats" class="stats-row"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">📜 Keep set & chunk manifest</div>
+        <div class="panel-body">
+          <div id="selectionSummary" class="note-box"></div>
+
+          <div class="select-all-row">
+            <button id="selectAllButton" class="btn btn-sea">Select all live chunks</button>
+            <button id="clearAllButton" class="btn btn-ghost">Clear keep set</button>
+          </div>
+
+          <div id="chunks" class="chunk-list"></div>
+
+          <div class="button-stack">
+            <button id="pruneButton" class="btn btn-danger">Prune non-selected chunks</button>
+            <button id="decryptButton" class="btn btn-sea">Decrypt remaining chunks</button>
+            <button id="manifestButton" class="btn btn-ghost">Export manifest JSON</button>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="lower-grid">
+      <section class="panel">
+        <div class="panel-header">🧭 State flow</div>
+        <div class="panel-body">
+          <div id="flowDiagram" class="flow-grid"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">🗺 Archive byte map</div>
+        <div class="panel-body">
+          <div id="archiveSummary" class="note-box"></div>
+          <div id="archiveMap"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">📦 Manifest preview</div>
+        <div class="panel-body">
+          <div class="note-box">Manifest data stays weak-model metadata only. Exporting it does not turn the browser into a trusted component.</div>
+          <pre id="manifestView">{}</pre>
+        </div>
+      </section>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">🔎 Chunk + capsule state</div>
+      <div class="panel-body">
+        <div id="chunkVisualization" class="chunk-card-grid"></div>
+      </div>
+    </section>
+
+    <section class="output-bar">
+      <div class="output-label">Residual output</div>
+      <div id="outputMessage" class="output-message output-idle">No decrypt action yet. Seal a file to start the weak-model voyage.</div>
+    </section>
+  </div>
 
   <script>
     const encoder = new TextEncoder();
-    const formatName = "bottleship-demo-v0";
-    let archive = null;
+    const formatName = 'bottleship-demo-v0';
+    const SHIP_W = 220;
+    const SHIP_H = 300;
+    const shipPath = `
+      M 110,10
+      C 115,10 122,14 125,20
+      L 130,50
+      C 145,52 158,58 162,68
+      L 168,88
+      C 175,92 180,100 180,110
+      L 178,150
+      C 185,154 190,164 188,176
+      L 186,200
+      C 188,212 185,224 180,232
+      L 176,256
+      C 180,262 182,270 180,278
+      L 172,292
+      C 162,302 142,308 110,310
+      C 78,308 58,302 48,292
+      L 40,278
+      C 38,270 40,262 44,256
+      L 40,232
+      C 35,224 32,212 34,200
+      L 32,176
+      C 30,164 35,154 42,150
+      L 40,110
+      C 40,100 45,92 52,88
+      L 58,68
+      C 62,58 75,52 90,50
+      L 95,20
+      C 98,14 105,10 110,10
+      Z
+    `;
+    const mastPath = 'M 107,10 L 113,10 L 113,2 L 107,2 Z';
+    const sailLeft = 'M 108,12 C 70,30 50,60 55,85 L 108,75 Z';
+    const sailRight = 'M 112,12 C 150,30 170,60 165,85 L 112,75 Z';
+
+    const app = {
+      archive: null,
+      phase: 'idle',
+      output: {
+        kind: 'idle',
+        message: 'No decrypt action yet. Seal a file to start the weak-model voyage.'
+      }
+    };
+
+    const refs = {
+      phaseBadge: document.getElementById('phaseBadge'),
+      statusCards: document.getElementById('statusCards'),
+      guidanceBanner: document.getElementById('guidanceBanner'),
+      fileInput: document.getElementById('fileInput'),
+      fileMeta: document.getElementById('fileMeta'),
+      thresholdInput: document.getElementById('thresholdInput'),
+      chunkSizeInput: document.getElementById('chunkSizeInput'),
+      sealButton: document.getElementById('sealButton'),
+      resetButton: document.getElementById('resetButton'),
+      phaseLead: document.getElementById('phaseLead'),
+      bottleSvg: document.getElementById('bottleSvg'),
+      bottleCaption: document.getElementById('bottleCaption'),
+      thresholdWrap: document.getElementById('thresholdWrap'),
+      bottleStats: document.getElementById('bottleStats'),
+      selectionSummary: document.getElementById('selectionSummary'),
+      selectAllButton: document.getElementById('selectAllButton'),
+      clearAllButton: document.getElementById('clearAllButton'),
+      chunks: document.getElementById('chunks'),
+      pruneButton: document.getElementById('pruneButton'),
+      decryptButton: document.getElementById('decryptButton'),
+      manifestButton: document.getElementById('manifestButton'),
+      flowDiagram: document.getElementById('flowDiagram'),
+      archiveSummary: document.getElementById('archiveSummary'),
+      archiveMap: document.getElementById('archiveMap'),
+      manifestView: document.getElementById('manifestView'),
+      chunkVisualization: document.getElementById('chunkVisualization'),
+      outputMessage: document.getElementById('outputMessage')
+    };
+
+    function sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
 
     function randomBytes(length) {
       const bytes = new Uint8Array(length);
@@ -595,35 +1316,35 @@
     }
 
     function base64url(bytes) {
-      let binary = "";
+      let binary = '';
       for (const byte of bytes) {
         binary += String.fromCharCode(byte);
       }
-      return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+      return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
     }
 
     function escapeHtml(value) {
       return String(value).replace(/[&<>"']/g, (character) => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        "\"": "&quot;",
-        "'": "&#39;"
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
       })[character]);
     }
 
     async function sha256(buffer) {
-      const digest = await crypto.subtle.digest("SHA-256", buffer);
+      const digest = await crypto.subtle.digest('SHA-256', buffer);
       return base64url(new Uint8Array(digest));
     }
 
     async function importAesKey(rawKey) {
       return crypto.subtle.importKey(
-        "raw",
+        'raw',
         rawKey,
-        { name: "AES-GCM" },
+        { name: 'AES-GCM' },
         false,
-        ["encrypt", "decrypt"]
+        ['encrypt', 'decrypt']
       );
     }
 
@@ -635,7 +1356,7 @@
       const key = await importAesKey(keyBytes);
       const iv = randomBytes(12);
       const ciphertext = await crypto.subtle.encrypt(
-        { name: "AES-GCM", iv, additionalData: makeChunkAad(chunkId, plaintext.length) },
+        { name: 'AES-GCM', iv, additionalData: makeChunkAad(chunkId, plaintext.length) },
         key,
         plaintext
       );
@@ -648,7 +1369,7 @@
     async function decryptChunk(ciphertext, keyBytes, iv, chunkId, plaintextSize) {
       const key = await importAesKey(keyBytes);
       const plaintext = await crypto.subtle.decrypt(
-        { name: "AES-GCM", iv, additionalData: makeChunkAad(chunkId, plaintextSize) },
+        { name: 'AES-GCM', iv, additionalData: makeChunkAad(chunkId, plaintextSize) },
         key,
         ciphertext
       );
@@ -656,15 +1377,11 @@
     }
 
     function formatBytes(value) {
-      return new Intl.NumberFormat("en-US").format(value);
+      return `${new Intl.NumberFormat('en-US').format(value)} bytes`;
     }
 
     function currentChunks() {
-      return archive ? archive.chunks.filter((chunk) => !chunk.destroyed) : [];
-    }
-
-    function hasPrunableChunks() {
-      return archive ? archive.chunks.some((chunk) => !chunk.destroyed && !chunk.keep) : false;
+      return app.archive ? app.archive.chunks.filter((chunk) => !chunk.destroyed) : [];
     }
 
     function remainingBytes() {
@@ -672,36 +1389,84 @@
     }
 
     function selectedKeepBytes() {
-      if (!archive) {
+      if (!app.archive) {
         return 0;
       }
-      return archive.chunks
+      return app.archive.chunks
         .filter((chunk) => !chunk.destroyed && chunk.keep)
         .reduce((sum, chunk) => sum + chunk.plaintextSize, 0);
     }
 
+    function hasPrunableChunks() {
+      return app.archive ? app.archive.chunks.some((chunk) => !chunk.destroyed && !chunk.keep) : false;
+    }
+
+    function canToggleKeep() {
+      return Boolean(app.archive) && app.phase === 'sealed';
+    }
+
+    function isBusy() {
+      return app.phase === 'sealing' || app.phase === 'pruning' || app.phase === 'decrypting';
+    }
+
+    function clampPercent(value, scale) {
+      return Math.max(0, Math.min(100, (value / scale) * 100));
+    }
+
+    function phaseLabel() {
+      return {
+        idle: 'Idle',
+        sealing: 'Sealing',
+        sealed: 'Sealed',
+        pruning: 'Pruning',
+        pruned: 'Pruned',
+        decrypting: 'Decrypting',
+        decrypted: 'Decrypted'
+      }[app.phase] || 'Idle';
+    }
+
+    function phaseClass() {
+      if (app.phase === 'sealing' || app.phase === 'pruning' || app.phase === 'decrypting') {
+        return 'phase-busy';
+      }
+      if (app.phase === 'sealed') {
+        return 'phase-sealed';
+      }
+      if (app.phase === 'pruned') {
+        return 'phase-pruned';
+      }
+      if (app.phase === 'decrypted') {
+        return 'phase-decrypted';
+      }
+      return 'phase-idle';
+    }
+
+    function setOutput(kind, message) {
+      app.output = { kind, message };
+    }
+
     function buildManifest() {
-      if (!archive) {
+      if (!app.archive) {
         return {};
       }
 
       return {
         format: formatName,
-        warning: "Weak browser demo only. Strong model requires trusted rollback-resistant state and irreversible capsule destruction.",
-        archiveId: archive.archiveId,
-        inputName: archive.inputName,
-        createdAt: archive.createdAt,
-        thresholdBytes: archive.thresholdBytes,
-        chunkSizeBytes: archive.chunkSizeBytes,
-        totalBytes: archive.totalBytes,
+        warning: 'Weak browser demo only. Strong model requires trusted rollback-resistant state and irreversible capsule destruction.',
+        archiveId: app.archive.archiveId,
+        inputName: app.archive.inputName,
+        createdAt: app.archive.createdAt,
+        thresholdBytes: app.archive.thresholdBytes,
+        chunkSizeBytes: app.archive.chunkSizeBytes,
+        totalBytes: app.archive.totalBytes,
         remainingBytes: remainingBytes(),
-        stateVersion: archive.stateVersion,
-        decryptAllowed: remainingBytes() <= archive.thresholdBytes,
+        stateVersion: app.archive.stateVersion,
+        decryptAllowed: remainingBytes() <= app.archive.thresholdBytes,
         crypto: {
-          aead: "AES-GCM-256",
-          hash: "SHA-256"
+          aead: 'AES-GCM-256',
+          hash: 'SHA-256'
         },
-        chunks: archive.chunks.map((chunk) => ({
+        chunks: app.archive.chunks.map((chunk) => ({
           id: chunk.id,
           index: chunk.index,
           plaintextSize: chunk.plaintextSize,
@@ -717,388 +1482,692 @@
     function describeChunkState(chunk, decryptAllowed) {
       if (chunk.destroyed || chunk.keyCapsule === null) {
         return {
-          tone: "pruned",
-          chipClass: "chip-danger",
-          stage: "pruned",
-          capsule: "capsule deleted",
-          decryptability: "not decryptable",
-          summary: "Removed from the residual archive."
+          tone: 'pruned',
+          badgeClass: 'chip-danger',
+          stage: 'pruned',
+          capsule: 'capsule deleted',
+          decryptability: 'not decryptable',
+          summary: 'Removed from the residual archive. In a real strong model this deletion would need to be irreversible and trusted.'
         };
       }
 
       if (decryptAllowed) {
         return {
-          tone: "decryptable",
-          chipClass: "chip-success",
-          stage: chunk.keep ? "kept residual" : "residual ready",
-          capsule: "capsule present",
-          decryptability: "decryptable now",
-          summary: "Below threshold, so this chunk can be decrypted."
+          tone: 'decryptable',
+          badgeClass: 'chip-decryptable',
+          stage: chunk.keep ? 'kept residual' : 'residual ready',
+          capsule: 'capsule present',
+          decryptability: 'decryptable now',
+          summary: 'The archive is at or below threshold in this weak browser demo, so this remaining chunk can be decrypted.'
         };
       }
 
       if (chunk.keep) {
         return {
-          tone: "keep",
-          chipClass: "chip-pending",
-          stage: "selected keep",
-          capsule: "capsule present",
-          decryptability: "blocked by threshold",
-          summary: "Chosen to survive prune, but the archive is still oversized."
+          tone: 'keep',
+          badgeClass: 'chip-success',
+          stage: 'selected keep',
+          capsule: 'capsule present',
+          decryptability: 'blocked by threshold',
+          summary: 'Marked to survive prune, but the total residual archive is still oversized.'
         };
       }
 
       return {
-        tone: "available",
-        chipClass: "chip-neutral",
-        stage: "sealed / droppable",
-        capsule: "capsule present",
-        decryptability: "blocked by threshold",
-        summary: "Still present in the oversized sealed archive."
+        tone: 'available',
+        badgeClass: 'chip-neutral',
+        stage: 'sealed / removable',
+        capsule: 'capsule present',
+        decryptability: 'blocked by threshold',
+        summary: 'Still present in the sealed archive and eligible to be pruned.'
       };
     }
 
-    function clampPercent(value, scale) {
-      return Math.max(0, Math.min(100, (value / scale) * 100));
+    function svgIdPrefix() {
+      return app.archive ? `b${app.archive.archiveId.replace(/[^a-zA-Z0-9_-]/g, '')}` : 'bottleship';
     }
 
-    function updateVisualization() {
-      const flowDiagram = document.getElementById("flowDiagram");
-      const thresholdSummary = document.getElementById("thresholdSummary");
-      const thresholdMeter = document.getElementById("thresholdMeter");
-      const archiveMap = document.getElementById("archiveMap");
-      const chunkVisualization = document.getElementById("chunkVisualization");
+    function renderBottleSvg() {
+      const chunks = app.archive ? app.archive.chunks : [];
+      const decryptAllowed = app.archive ? remainingBytes() <= app.archive.thresholdBytes : false;
+      const prefix = svgIdPrefix();
+      const sliceHeight = chunks.length > 0 ? SHIP_H / chunks.length : SHIP_H;
+      const bottleClass = app.phase === 'decrypted' ? 'decrypted-glow' : '';
 
-      if (!archive) {
-        flowDiagram.innerHTML = `
-          <div class="flow-step">
-            <span class="step-badge step-badge-neutral">waiting</span>
-            <h3>1. Seal oversized archive</h3>
-            <div class="step-detail">Create a chunked archive with simulated key capsules.</div>
-            <div class="step-meta">Weak-model teaching aid only.</div>
-          </div>
-          <div class="flow-step">
-            <span class="step-badge step-badge-neutral">waiting</span>
-            <h3>2. Choose keep set</h3>
-            <div class="step-detail">Mark the chunks that should survive the prune step.</div>
-            <div class="step-meta">Selection updates the visual state immediately.</div>
-          </div>
-          <div class="flow-step">
-            <span class="step-badge step-badge-neutral">waiting</span>
-            <h3>3. Prune non-kept chunks</h3>
-            <div class="step-detail">Delete simulated capsules for non-selected chunks.</div>
-            <div class="step-meta">A strong model would need irreversible destruction.</div>
-          </div>
-          <div class="flow-step">
-            <span class="step-badge step-badge-neutral">waiting</span>
-            <h3>4. Residual decrypt</h3>
-            <div class="step-detail">Decrypt only when remaining bytes are at or below the threshold.</div>
-            <div class="step-meta">This browser page cannot enforce trusted state.</div>
-          </div>
+      const clipMarkup = chunks.map((chunk, index) => `
+          <clipPath id="${prefix}-clip-${index}">
+            <rect x="0" y="${30 + index * sliceHeight}" width="${SHIP_W}" height="${sliceHeight + 1}"></rect>
+          </clipPath>
+      `).join('');
+
+      const segmentMarkup = chunks.map((chunk, index) => {
+        const state = describeChunkState(chunk, decryptAllowed);
+        const fill = state.tone === 'pruned'
+          ? 'rgba(255,255,255,0.02)'
+          : state.tone === 'keep'
+            ? '#2de8b0'
+            : state.tone === 'decryptable'
+              ? '#a88cff'
+              : '#e8832a';
+        const animationClass = [
+          'bottle-chunk-seg',
+          app.phase === 'sealing' ? 'sealing' : '',
+          chunk.pruning ? 'pruning' : '',
+          app.phase === 'decrypted' && !chunk.destroyed ? 'decrypted-glow' : ''
+        ].filter(Boolean).join(' ');
+        const pointer = canToggleKeep() && !chunk.destroyed ? 'cursor:pointer;' : '';
+        return `
+          <g clip-path="url(#${prefix}-clip-${index})">
+            <path
+              d="${shipPath}"
+              transform="translate(0,30)"
+              fill="${fill}"
+              opacity="${chunk.destroyed ? '0.10' : '0.96'}"
+              class="${animationClass}"
+              data-chunk-id="${escapeHtml(chunk.id)}"
+              style="${pointer}animation-delay:${(index * 0.06).toFixed(2)}s;"
+            ></path>
+          </g>
         `;
-        thresholdSummary.textContent = "Seal a file to see the threshold meter.";
-        thresholdMeter.className = "visual-empty";
-        thresholdMeter.textContent = "No archive loaded.";
-        archiveMap.className = "visual-empty";
-        archiveMap.textContent = "Chunk layout appears after sealing.";
-        chunkVisualization.innerHTML = `<div class="visual-empty">Seal a file to inspect simulated capsules and decryptability.</div>`;
+      }).join('');
+
+      return `
+        <svg viewBox="-20 -50 260 440" xmlns="http://www.w3.org/2000/svg" class="bottle-glass">
+          <defs>
+            ${clipMarkup}
+          </defs>
+
+          <path d="
+            M 90,-30 L 90,-5
+            C 68,8 48,28 42,55
+            L 36,90
+            C 30,100 26,115 26,130
+            L 26,300
+            C 26,340 65,365 110,365
+            C 155,365 194,340 194,300
+            L 194,130
+            C 194,115 190,100 184,90
+            L 178,55
+            C 172,28 152,8 130,-5
+            L 130,-30 Z
+          " fill="rgba(10,40,60,0.5)"></path>
+
+          ${chunks.length > 0 ? segmentMarkup : ''}
+
+          ${chunks.length > 0 ? `
+            <g transform="translate(0,30)" opacity="${app.phase === 'decrypted' ? '0.95' : '0.35'}">
+              <path d="${mastPath}" fill="rgba(180,140,80,0.7)"></path>
+              <path d="${sailLeft}" fill="rgba(200,160,90,0.2)" stroke="rgba(200,160,90,0.28)" stroke-width="0.6"></path>
+              <path d="${sailRight}" fill="rgba(200,160,90,0.2)" stroke="rgba(200,160,90,0.28)" stroke-width="0.6"></path>
+            </g>
+            <path d="${shipPath}" transform="translate(0,30)" fill="none" stroke="${app.phase === 'decrypted' ? 'rgba(125,255,195,0.62)' : 'rgba(200,150,60,0.35)'}" stroke-width="1.2" class="${bottleClass}"></path>
+          ` : `
+            <path d="${shipPath}" transform="translate(0,30)" fill="rgba(255,255,255,0.02)" stroke="rgba(113,183,223,0.12)" stroke-width="1" stroke-dasharray="4 6"></path>
+          `}
+
+          <path d="
+            M 90,-30 L 90,-5
+            C 68,8 48,28 42,55
+            L 36,90
+            C 30,100 26,115 26,130
+            L 26,300
+            C 26,340 65,365 110,365
+            C 155,365 194,340 194,300
+            L 194,130
+            C 194,115 190,100 184,90
+            L 178,55
+            C 172,28 152,8 130,-5
+            L 130,-30 Z
+          " fill="none" stroke="rgba(100,220,190,0.45)" stroke-width="2"></path>
+
+          <path d="
+            M 96,-28 L 96,-6
+            C 76,6 57,25 52,50
+            L 47,82
+            C 41,94 38,108 38,122
+            L 38,180
+            C 38,175 41,165 46,158
+            L 46,90
+            C 46,80 52,65 60,54
+            L 68,28
+            C 76,12 88,2 96,-28 Z
+          " fill="rgba(200,255,240,0.04)" stroke="rgba(200,255,240,0.12)" stroke-width="0.5"></path>
+
+          <rect x="88" y="-42" width="44" height="16" rx="5" fill="#8b6914" stroke="rgba(200,160,60,0.5)" stroke-width="1"></rect>
+          <rect x="92" y="-40" width="8" height="12" rx="2" fill="rgba(255,200,80,0.15)"></rect>
+
+          ${chunks.length > 0 ? `
+            <g transform="translate(55, 230)">
+              <rect x="0" y="0" width="100" height="36" rx="4" fill="rgba(20,40,30,0.7)" stroke="rgba(100,200,160,0.25)" stroke-width="0.8"></rect>
+              <text x="50" y="13" text-anchor="middle" font-size="6" fill="rgba(180,220,200,0.6)" font-family="Cinzel, serif" letter-spacing="2">BOTTLESHIP</text>
+              <text x="50" y="25" text-anchor="middle" font-size="8" fill="rgba(200,160,60,0.8)" font-family="Courier Prime, monospace">${currentChunks().length}/${chunks.length} capsules</text>
+            </g>
+          ` : ''}
+        </svg>
+      `;
+    }
+
+    function renderHeader() {
+      refs.phaseBadge.textContent = phaseLabel();
+      refs.phaseBadge.className = `phase-badge ${phaseClass()}`;
+    }
+
+    function renderStatusCards() {
+      if (!app.archive) {
+        const file = refs.fileInput.files[0];
+        const threshold = Number(refs.thresholdInput.value) || 0;
+        const chunkSize = Number(refs.chunkSizeInput.value) || 0;
+        refs.statusCards.innerHTML = [
+          {
+            label: 'Input ready',
+            value: file ? escapeHtml(file.name) : 'No file chosen',
+            tone: file ? 'tone-good' : ''
+          },
+          {
+            label: 'Threshold',
+            value: formatBytes(threshold),
+            tone: ''
+          },
+          {
+            label: 'Chunk size',
+            value: formatBytes(chunkSize),
+            tone: ''
+          },
+          {
+            label: 'Security mode',
+            value: 'Weak model only',
+            tone: 'tone-danger'
+          }
+        ].map((card) => `
+          <div class="status-card">
+            <div class="status-label">${card.label}</div>
+            <strong class="${card.tone}">${card.value}</strong>
+          </div>
+        `).join('');
+        refs.guidanceBanner.className = 'warning-box';
+        refs.guidanceBanner.textContent = 'This page is intentionally explicit about being weak-model only. Nothing here should be described as a strong-model or real-secret implementation.';
         return;
       }
 
-      const currentRemainingBytes = remainingBytes();
-      const currentSelectedKeepBytes = selectedKeepBytes();
-      const decryptAllowed = currentRemainingBytes <= archive.thresholdBytes;
-      const totalChunks = archive.chunks.length;
-      const keptChunks = archive.chunks.filter((chunk) => !chunk.destroyed && chunk.keep).length;
-      const destroyedChunks = archive.chunks.filter((chunk) => chunk.destroyed).length;
-      const currentRemainingChunks = currentChunks().length;
-      const meterScale = Math.max(archive.totalBytes, archive.thresholdBytes, 1);
-      const remainingPercent = clampPercent(currentRemainingBytes, meterScale);
-      const selectedPercent = clampPercent(currentSelectedKeepBytes, meterScale);
-      const thresholdPercent = clampPercent(archive.thresholdBytes, meterScale);
-      const overThresholdBytes = Math.max(currentRemainingBytes - archive.thresholdBytes, 0);
-      const underThresholdBytes = Math.max(archive.thresholdBytes - currentRemainingBytes, 0);
+      const decryptAllowed = remainingBytes() <= app.archive.thresholdBytes;
+      const activeCapsules = app.archive.chunks.filter((chunk) => chunk.keyCapsule !== null).length;
+      const cards = [
+        { label: 'Input file', value: escapeHtml(app.archive.inputName) },
+        { label: 'Total bytes', value: formatBytes(app.archive.totalBytes) },
+        { label: 'Remaining bytes', value: formatBytes(remainingBytes()), tone: decryptAllowed ? 'tone-good' : 'tone-danger' },
+        { label: 'Keep-set bytes', value: formatBytes(selectedKeepBytes()), tone: selectedKeepBytes() <= app.archive.thresholdBytes ? 'tone-good' : 'tone-danger' },
+        { label: 'Threshold', value: formatBytes(app.archive.thresholdBytes) },
+        { label: 'State version', value: String(app.archive.stateVersion) },
+        { label: 'Decrypt status', value: decryptAllowed ? 'Allowed in weak demo' : 'Refused above threshold', tone: decryptAllowed ? 'tone-good' : 'tone-danger' },
+        { label: 'Live capsules', value: String(activeCapsules), tone: activeCapsules > 0 ? 'tone-warn' : '' }
+      ];
 
-      let keepBadgeClass = "step-badge-neutral";
-      let keepBadgeText = "nothing selected";
-      if (currentSelectedKeepBytes > archive.thresholdBytes) {
-        keepBadgeClass = "step-badge-danger";
-        keepBadgeText = "keep set too large";
-      } else if (currentSelectedKeepBytes > 0) {
-        keepBadgeClass = "step-badge-success";
-        keepBadgeText = "keep set fits";
+      refs.statusCards.innerHTML = cards.map((card) => `
+        <div class="status-card">
+          <div class="status-label">${card.label}</div>
+          <strong class="${card.tone || ''}">${card.value}</strong>
+        </div>
+      `).join('');
+
+      refs.guidanceBanner.className = decryptAllowed ? 'success-box' : 'warning-box';
+      refs.guidanceBanner.textContent = decryptAllowed
+        ? 'Remaining bytes are at or below the threshold in this weak browser demo, so residual decrypt is available. This does not imply trusted enforcement.'
+        : 'Remaining bytes still exceed the threshold in this weak browser demo, so decrypt is refused until you prune the residual archive smaller.';
+    }
+
+    function renderControls() {
+      const file = refs.fileInput.files[0];
+      refs.fileMeta.textContent = file
+        ? `${file.name} · ${formatBytes(file.size)} ready for the next seal.`
+        : 'No file chosen.';
+
+      refs.fileInput.disabled = isBusy();
+      refs.thresholdInput.disabled = isBusy();
+      refs.chunkSizeInput.disabled = isBusy();
+      refs.sealButton.disabled = isBusy() || !file;
+      refs.resetButton.disabled = isBusy() || (!app.archive && !file);
+      refs.selectAllButton.disabled = !canToggleKeep() || currentChunks().length === 0;
+      refs.clearAllButton.disabled = !canToggleKeep() || currentChunks().length === 0;
+      refs.pruneButton.disabled = !app.archive || app.phase !== 'sealed' || currentChunks().length === 0 || !hasPrunableChunks() || selectedKeepBytes() > app.archive.thresholdBytes;
+      refs.decryptButton.disabled = !app.archive || isBusy() || remainingBytes() > app.archive.thresholdBytes;
+      refs.manifestButton.disabled = !app.archive || isBusy();
+    }
+
+    function renderPhaseLead() {
+      if (!app.archive) {
+        refs.phaseLead.textContent = 'Choose a file, set the threshold and chunk size, then seal the archive into a bottle-ship of simulated capsules.';
+        refs.bottleCaption.textContent = 'Empty vessel: no archive is loaded.';
+        return;
       }
 
-      let pruneBadgeClass = "step-badge-neutral";
-      let pruneBadgeText = "not pruned yet";
-      if (destroyedChunks > 0) {
-        pruneBadgeClass = "step-badge-success";
-        pruneBadgeText = "capsules pruned";
-      } else if (currentSelectedKeepBytes <= archive.thresholdBytes && hasPrunableChunks()) {
-        pruneBadgeClass = "step-badge-pending";
-        pruneBadgeText = "ready to prune";
+      const remaining = remainingBytes();
+      const threshold = app.archive.thresholdBytes;
+      if (app.phase === 'sealing') {
+        refs.phaseLead.textContent = 'The bottle is being sealed: each chunk is encrypted and assigned a browser-memory capsule.';
+      } else if (app.phase === 'sealed' && remaining > threshold) {
+        refs.phaseLead.textContent = 'Oversized sealed archive: choose a keep set, then prune non-selected chunks until the residual archive falls beneath the threshold.';
+      } else if (app.phase === 'sealed') {
+        refs.phaseLead.textContent = 'This sealed archive is already at or below threshold, so residual decrypt is available in the weak browser demo.';
+      } else if (app.phase === 'pruning') {
+        refs.phaseLead.textContent = 'Non-selected chunks are being pruned by deleting simulated capsules from browser memory.';
+      } else if (app.phase === 'pruned' && remaining > threshold) {
+        refs.phaseLead.textContent = 'Prune completed, but the remaining archive is still too large. The weak demo cannot restore destroyed capsules.';
+      } else if (app.phase === 'pruned') {
+        refs.phaseLead.textContent = 'Prune completed and the remaining archive now fits beneath the threshold.';
+      } else if (app.phase === 'decrypting') {
+        refs.phaseLead.textContent = 'Residual decrypt is in progress inside the browser. This remains weak-model, user-controlled state.';
+      } else {
+        refs.phaseLead.textContent = 'Residual output was decrypted and downloaded. The browser state is still weak-model and should not be treated as trusted.';
       }
 
-      const decryptBadgeClass = decryptAllowed ? "step-badge-success" : "step-badge-danger";
-      const decryptBadgeText = archive.lastAction === "decrypted" ? "residual downloaded" : (decryptAllowed ? "decrypt allowed" : "decrypt refused");
+      refs.bottleCaption.textContent = `${currentChunks().length} active chunk${currentChunks().length === 1 ? '' : 's'} remain inside the bottle; ${app.archive.chunks.filter((chunk) => chunk.destroyed).length} chunk${app.archive.chunks.filter((chunk) => chunk.destroyed).length === 1 ? '' : 's'} have been pruned.`;
+    }
 
-      flowDiagram.innerHTML = `
-        <div class="flow-step">
-          <span class="step-badge ${archive.totalBytes > archive.thresholdBytes ? "step-badge-danger" : "step-badge-success"}">
-            ${archive.totalBytes > archive.thresholdBytes ? "oversized" : "within threshold"}
-          </span>
-          <h3>1. Seal oversized archive</h3>
-          <div class="step-detail">${formatBytes(archive.totalBytes)} bytes sealed into ${totalChunks} chunk${totalChunks === 1 ? "" : "s"}.</div>
-          <div class="step-meta">Each chunk starts with a simulated in-memory capsule.</div>
-        </div>
-        <div class="flow-step">
-          <span class="step-badge ${keepBadgeClass}">${keepBadgeText}</span>
-          <h3>2. Choose keep set</h3>
-          <div class="step-detail">${keptChunks} chunk${keptChunks === 1 ? "" : "s"} selected to keep (${formatBytes(currentSelectedKeepBytes)} bytes).</div>
-          <div class="step-meta">Selection is only a browser-side teaching state in this demo.</div>
-        </div>
-        <div class="flow-step">
-          <span class="step-badge ${pruneBadgeClass}">${pruneBadgeText}</span>
-          <h3>3. Prune non-kept chunks</h3>
-          <div class="step-detail">${destroyedChunks} chunk${destroyedChunks === 1 ? "" : "s"} already pruned; state version ${archive.stateVersion}.</div>
-          <div class="step-meta">Prune removes simulated capsules for all non-kept chunks.</div>
-        </div>
-        <div class="flow-step">
-          <span class="step-badge ${decryptBadgeClass}">${decryptBadgeText}</span>
-          <h3>4. Residual decrypt</h3>
-          <div class="step-detail">${formatBytes(currentRemainingBytes)} bytes remain across ${currentRemainingChunks} active chunk${currentRemainingChunks === 1 ? "" : "s"}.</div>
-          <div class="step-meta">${decryptAllowed ? `Remaining bytes are ${formatBytes(underThresholdBytes)} below the threshold.` : `Remaining bytes exceed the threshold by ${formatBytes(overThresholdBytes)}.`}</div>
-        </div>
-      `;
+    function renderBottlePanel() {
+      refs.bottleSvg.innerHTML = renderBottleSvg();
 
-      thresholdSummary.innerHTML = decryptAllowed
-        ? `Remaining bytes are at or below the threshold in this <strong>weak-model only</strong> demo, so residual decrypt is allowed.`
-        : `Remaining bytes still exceed the threshold in this <strong>weak-model only</strong> demo, so decrypt is refused until you prune.`;
-      thresholdMeter.className = "";
-      thresholdMeter.innerHTML = `
+      if (!app.archive) {
+        refs.thresholdWrap.innerHTML = '<div class="empty-state">Seal a file to see the threshold meter and keep-set overlay.</div>';
+        refs.bottleStats.innerHTML = [
+          { value: '0', label: 'Chunks' },
+          { value: '0', label: 'Live capsules' },
+          { value: '—', label: 'Threshold margin' }
+        ].map((stat) => `
+          <div class="stat">
+            <div class="stat-value">${stat.value}</div>
+            <div class="stat-label">${stat.label}</div>
+          </div>
+        `).join('');
+        return;
+      }
+
+      const remaining = remainingBytes();
+      const keepBytes = selectedKeepBytes();
+      const meterScale = Math.max(app.archive.totalBytes, app.archive.thresholdBytes, 1);
+      const remainingPercent = clampPercent(remaining, meterScale);
+      const keepPercent = clampPercent(keepBytes, meterScale);
+      const thresholdPercent = clampPercent(app.archive.thresholdBytes, meterScale);
+      const decryptAllowed = remaining <= app.archive.thresholdBytes;
+      const thresholdDelta = decryptAllowed
+        ? `${formatBytes(app.archive.thresholdBytes - remaining)} below threshold`
+        : `${formatBytes(remaining - app.archive.thresholdBytes)} above threshold`;
+
+      refs.thresholdWrap.innerHTML = `
+        <div class="subtle-text">
+          ${decryptAllowed
+            ? 'Threshold satisfied in the weak browser demo. Residual decrypt is now allowed.'
+            : 'Threshold still exceeded in the weak browser demo. Decrypt remains refused until you prune more.'}
+        </div>
         <div class="meter-shell" aria-label="Remaining bytes versus threshold">
-          <div class="meter-fill meter-fill-remaining" style="width: ${remainingPercent}%;"></div>
-          <div class="meter-fill meter-fill-selected" style="width: ${selectedPercent}%;"></div>
+          <div class="meter-fill meter-fill-remaining" style="width:${remainingPercent}%;"></div>
+          <div class="meter-fill meter-fill-selected" style="width:${keepPercent}%;"></div>
           <div class="threshold-marker" style="left: calc(${thresholdPercent}% - 1.5px);"></div>
         </div>
         <div class="meter-scale">
           <span>0 bytes</span>
-          <span>scale: ${formatBytes(meterScale)} bytes</span>
+          <span>scale: ${formatBytes(meterScale)}</span>
         </div>
-        <div class="viz-legend">
-          <span class="legend-item"><span class="legend-swatch swatch-remaining"></span>remaining archive: ${formatBytes(currentRemainingBytes)}</span>
-          <span class="legend-item"><span class="legend-swatch swatch-selected"></span>selected keep set: ${formatBytes(currentSelectedKeepBytes)}</span>
-          <span class="legend-item"><span class="legend-swatch swatch-threshold"></span>threshold: ${formatBytes(archive.thresholdBytes)}</span>
+        <div class="legend">
+          <span class="legend-item"><span class="legend-swatch swatch-available"></span>remaining archive: ${formatBytes(remaining)}</span>
+          <span class="legend-item"><span class="legend-swatch swatch-keep"></span>keep set: ${formatBytes(keepBytes)}</span>
+          <span class="legend-item"><span class="legend-swatch swatch-threshold"></span>threshold: ${formatBytes(app.archive.thresholdBytes)}</span>
         </div>
       `;
 
-      if (totalChunks === 0) {
-        archiveMap.className = "visual-empty";
-        archiveMap.textContent = "This sealed archive contains no chunks.";
-        chunkVisualization.innerHTML = `<div class="visual-empty">No chunks were generated for this file.</div>`;
+      const stats = [
+        { value: String(app.archive.chunks.length), label: 'Chunks' },
+        { value: String(currentChunks().length), label: 'Live capsules' },
+        { value: thresholdDelta, label: 'Threshold margin' }
+      ];
+
+      refs.bottleStats.innerHTML = stats.map((stat) => `
+        <div class="stat">
+          <div class="stat-value">${escapeHtml(stat.value)}</div>
+          <div class="stat-label">${stat.label}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderSelectionPanel() {
+      if (!app.archive) {
+        refs.selectionSummary.className = 'note-box';
+        refs.selectionSummary.textContent = 'Seal a file first. Then click chunk rows, archive segments, or bottle slices to choose the keep set.';
+        refs.chunks.innerHTML = '<div class="empty-state">No chunks available yet.</div>';
         return;
       }
 
-      archiveMap.className = "";
-      archiveMap.innerHTML = `
+      const keepBytes = selectedKeepBytes();
+      const remaining = remainingBytes();
+      const decryptAllowed = remaining <= app.archive.thresholdBytes;
+      if (app.phase === 'sealed') {
+        refs.selectionSummary.className = keepBytes <= app.archive.thresholdBytes ? 'note-box' : 'warning-box';
+        refs.selectionSummary.textContent = keepBytes <= app.archive.thresholdBytes
+          ? `Keep set currently covers ${formatBytes(keepBytes)}. You can prune any non-selected chunks.`
+          : `Keep set currently covers ${formatBytes(keepBytes)}, which exceeds the threshold of ${formatBytes(app.archive.thresholdBytes)}. Prune stays disabled until the keep set fits.`;
+      } else if (app.phase === 'pruning') {
+        refs.selectionSummary.className = 'warning-box';
+        refs.selectionSummary.textContent = 'Prune in progress: the browser is deleting simulated capsules for all non-selected chunks.';
+      } else if (decryptAllowed) {
+        refs.selectionSummary.className = 'success-box';
+        refs.selectionSummary.textContent = `Residual archive is ${formatBytes(remaining)} and can be decrypted in this weak-model demo.`;
+      } else {
+        refs.selectionSummary.className = 'warning-box';
+        refs.selectionSummary.textContent = `Residual archive is still ${formatBytes(remaining)}, above the threshold of ${formatBytes(app.archive.thresholdBytes)}.`;
+      }
+
+      const decryptAllowedNow = remaining <= app.archive.thresholdBytes;
+      refs.chunks.innerHTML = app.archive.chunks.length === 0
+        ? '<div class="empty-state">This archive contains no chunks.</div>'
+        : app.archive.chunks.map((chunk) => {
+          const state = describeChunkState(chunk, decryptAllowedNow);
+          const buttonDisabled = !canToggleKeep() || chunk.destroyed;
+          return `
+            <button type="button" class="chunk-item ${state.tone}" data-chunk-id="${escapeHtml(chunk.id)}" ${buttonDisabled ? 'disabled' : ''} aria-pressed="${chunk.keep ? 'true' : 'false'}">
+              <span class="chunk-dot"></span>
+              <span class="chunk-info">
+                <span class="chunk-idx">Chunk ${escapeHtml(chunk.id)}</span>
+                <span class="chunk-bytes">${formatBytes(chunk.plaintextSize)}</span>
+                <span class="chunk-status">${escapeHtml(state.stage)} · ${escapeHtml(state.decryptability)}</span>
+              </span>
+              <span class="chunk-capsule">${escapeHtml(state.capsule)}</span>
+            </button>
+          `;
+        }).join('');
+    }
+
+    function renderFlowDiagram() {
+      if (!app.archive) {
+        refs.flowDiagram.innerHTML = [
+          {
+            badge: 'waiting',
+            tone: 'step-neutral',
+            title: '1. Seal oversized archive',
+            detail: 'Create a chunked archive with simulated capsules.',
+            meta: 'Weak-model teaching aid only.'
+          },
+          {
+            badge: 'waiting',
+            tone: 'step-neutral',
+            title: '2. Choose keep set',
+            detail: 'Mark the chunks that should survive prune.',
+            meta: 'Selection updates the visuals immediately.'
+          },
+          {
+            badge: 'waiting',
+            tone: 'step-neutral',
+            title: '3. Prune non-kept chunks',
+            detail: 'Delete simulated capsules for non-selected chunks.',
+            meta: 'A strong model would need irreversible trusted destruction.'
+          },
+          {
+            badge: 'waiting',
+            tone: 'step-neutral',
+            title: '4. Residual decrypt',
+            detail: 'Decrypt only when remaining bytes are at or below threshold.',
+            meta: 'This browser page cannot enforce trusted state.'
+          }
+        ].map((step) => `
+          <div class="flow-step">
+            <span class="step-badge ${step.tone}">${step.badge}</span>
+            <h3>${step.title}</h3>
+            <div class="flow-detail">${step.detail}</div>
+            <div class="flow-meta">${step.meta}</div>
+          </div>
+        `).join('');
+        return;
+      }
+
+      const remaining = remainingBytes();
+      const keepBytes = selectedKeepBytes();
+      const decryptAllowed = remaining <= app.archive.thresholdBytes;
+      const totalChunks = app.archive.chunks.length;
+      const keptChunks = app.archive.chunks.filter((chunk) => !chunk.destroyed && chunk.keep).length;
+      const destroyedChunks = app.archive.chunks.filter((chunk) => chunk.destroyed).length;
+      const activeChunks = currentChunks().length;
+
+      let keepTone = 'step-neutral';
+      let keepBadge = 'nothing selected';
+      if (keepBytes > app.archive.thresholdBytes) {
+        keepTone = 'step-danger';
+        keepBadge = 'keep set too large';
+      } else if (keptChunks > 0) {
+        keepTone = 'step-success';
+        keepBadge = 'keep set fits';
+      }
+
+      let pruneTone = 'step-neutral';
+      let pruneBadge = 'not pruned yet';
+      if (app.phase === 'pruning') {
+        pruneTone = 'step-pending';
+        pruneBadge = 'pruning';
+      } else if (destroyedChunks > 0) {
+        pruneTone = 'step-success';
+        pruneBadge = 'capsules pruned';
+      } else if (hasPrunableChunks()) {
+        pruneTone = keepBytes <= app.archive.thresholdBytes ? 'step-pending' : 'step-danger';
+        pruneBadge = keepBytes <= app.archive.thresholdBytes ? 'ready to prune' : 'keep too large';
+      }
+
+      let decryptTone = decryptAllowed ? 'step-success' : 'step-danger';
+      let decryptBadge = decryptAllowed ? 'decrypt allowed' : 'decrypt refused';
+      if (app.phase === 'decrypting') {
+        decryptTone = 'step-pending';
+        decryptBadge = 'decrypting';
+      } else if (app.phase === 'decrypted') {
+        decryptTone = 'step-success';
+        decryptBadge = 'residual downloaded';
+      }
+
+      const steps = [
+        {
+          badge: app.phase === 'sealing' ? 'sealing' : (app.archive.totalBytes > app.archive.thresholdBytes ? 'oversized' : 'within threshold'),
+          tone: app.phase === 'sealing' ? 'step-pending' : (app.archive.totalBytes > app.archive.thresholdBytes ? 'step-danger' : 'step-success'),
+          title: '1. Seal oversized archive',
+          detail: `${formatBytes(app.archive.totalBytes)} sealed into ${totalChunks} chunk${totalChunks === 1 ? '' : 's'}.`,
+          meta: 'Each chunk starts with a simulated browser-memory capsule.'
+        },
+        {
+          badge: keepBadge,
+          tone: keepTone,
+          title: '2. Choose keep set',
+          detail: `${keptChunks} chunk${keptChunks === 1 ? '' : 's'} selected (${formatBytes(keepBytes)}).`,
+          meta: 'The keep set is weak-model state only until prune happens.'
+        },
+        {
+          badge: pruneBadge,
+          tone: pruneTone,
+          title: '3. Prune non-kept chunks',
+          detail: `${destroyedChunks} chunk${destroyedChunks === 1 ? '' : 's'} pruned; state version ${app.archive.stateVersion}.`,
+          meta: 'Prune deletes simulated capsules for all non-selected chunks.'
+        },
+        {
+          badge: decryptBadge,
+          tone: decryptTone,
+          title: '4. Residual decrypt',
+          detail: `${formatBytes(remaining)} remain across ${activeChunks} active chunk${activeChunks === 1 ? '' : 's'}.`,
+          meta: decryptAllowed
+            ? `Remaining bytes are ${formatBytes(app.archive.thresholdBytes - remaining)} below threshold.`
+            : `Remaining bytes exceed threshold by ${formatBytes(remaining - app.archive.thresholdBytes)}.`
+        }
+      ];
+
+      refs.flowDiagram.innerHTML = steps.map((step) => `
+        <div class="flow-step">
+          <span class="step-badge ${step.tone}">${escapeHtml(step.badge)}</span>
+          <h3>${step.title}</h3>
+          <div class="flow-detail">${escapeHtml(step.detail)}</div>
+          <div class="flow-meta">${escapeHtml(step.meta)}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderArchiveMap() {
+      if (!app.archive) {
+        refs.archiveSummary.className = 'note-box';
+        refs.archiveSummary.textContent = 'Seal a file to inspect the archive byte map and click individual segments to build the keep set.';
+        refs.archiveMap.innerHTML = '<div class="empty-state">No archive loaded.</div>';
+        return;
+      }
+
+      const remaining = remainingBytes();
+      const decryptAllowed = remaining <= app.archive.thresholdBytes;
+      refs.archiveSummary.className = decryptAllowed ? 'success-box' : 'note-box';
+      refs.archiveSummary.textContent = decryptAllowed
+        ? 'Each surviving segment in the strip is now decryptable in the weak browser demo. Pruned segments remain visible for state history.'
+        : 'Click live segments during the sealed phase to choose the keep set. Their relative widths still reflect plaintext size.';
+
+      if (app.archive.chunks.length === 0) {
+        refs.archiveMap.innerHTML = '<div class="empty-state">This sealed archive contains no chunks.</div>';
+        return;
+      }
+
+      refs.archiveMap.innerHTML = `
         <div class="archive-strip">
-          ${archive.chunks.map((chunk) => {
+          ${app.archive.chunks.map((chunk) => {
             const state = describeChunkState(chunk, decryptAllowed);
+            const interactive = canToggleKeep() && !chunk.destroyed;
             return `
-              <div class="archive-segment segment-${state.tone}" style="flex-grow: ${Math.max(chunk.plaintextSize, 1)};">
+              <div class="archive-segment segment-${state.tone} ${chunk.keep ? 'selected' : ''} ${interactive ? 'segment-interactive' : ''}" data-chunk-id="${interactive ? escapeHtml(chunk.id) : ''}" style="flex-grow:${Math.max(chunk.plaintextSize, 1)};">
                 <strong>${escapeHtml(chunk.id)}</strong>
-                <small>${formatBytes(chunk.plaintextSize)} bytes</small>
+                <small>${formatBytes(chunk.plaintextSize)}</small>
                 <small>${escapeHtml(state.stage)}</small>
               </div>
             `;
-          }).join("")}
+          }).join('')}
         </div>
-        <div class="viz-legend">
+        <div class="legend">
           <span class="legend-item"><span class="legend-swatch swatch-available"></span>sealed / removable</span>
           <span class="legend-item"><span class="legend-swatch swatch-keep"></span>selected keep</span>
           <span class="legend-item"><span class="legend-swatch swatch-decryptable"></span>residual decryptable</span>
           <span class="legend-item"><span class="legend-swatch swatch-pruned"></span>pruned capsule</span>
         </div>
       `;
+    }
 
-      chunkVisualization.innerHTML = archive.chunks.map((chunk) => {
+    function renderChunkVisualization() {
+      if (!app.archive) {
+        refs.chunkVisualization.innerHTML = '<div class="empty-state">Seal a file to inspect per-chunk capsule state.</div>';
+        return;
+      }
+
+      const decryptAllowed = remainingBytes() <= app.archive.thresholdBytes;
+      if (app.archive.chunks.length === 0) {
+        refs.chunkVisualization.innerHTML = '<div class="empty-state">This archive contains no chunks.</div>';
+        return;
+      }
+
+      refs.chunkVisualization.innerHTML = app.archive.chunks.map((chunk) => {
         const state = describeChunkState(chunk, decryptAllowed);
         return `
-          <div class="chunk-card-visual segment-${state.tone}">
+          <article class="chunk-card ${state.tone}">
             <div class="chunk-card-header">
-              <strong>Chunk ${escapeHtml(chunk.id)}</strong>
-              <span class="chip ${state.chipClass}">${escapeHtml(state.stage)}</span>
+              <div>
+                <h3>Chunk ${escapeHtml(chunk.id)}</h3>
+                <div class="muted">${formatBytes(chunk.plaintextSize)} · hash ${escapeHtml(chunk.ciphertextHash.slice(0, 16))}…</div>
+              </div>
+              <span class="chip ${state.badgeClass}">${escapeHtml(state.stage)}</span>
             </div>
-            <p class="muted">${formatBytes(chunk.plaintextSize)} bytes · hash ${escapeHtml(chunk.ciphertextHash.slice(0, 16))}…</p>
             <div class="chip-row">
-              <span class="chip ${chunk.keyCapsule === null ? "chip-danger" : "chip-neutral"}">${chunk.keyCapsule === null ? "capsule deleted" : "capsule present"}</span>
-              <span class="chip ${chunk.keep ? "chip-pending" : "chip-neutral"}">${chunk.keep ? "keep selected" : "not selected"}</span>
-              <span class="chip ${chunk.destroyed ? "chip-danger" : (decryptAllowed ? "chip-success" : "chip-pending")}">${escapeHtml(state.decryptability)}</span>
+              <span class="chip ${chunk.keyCapsule === null ? 'chip-danger' : 'chip-neutral'}">${chunk.keyCapsule === null ? 'capsule deleted' : 'capsule present'}</span>
+              <span class="chip ${chunk.keep ? 'chip-success' : 'chip-neutral'}">${chunk.keep ? 'keep selected' : 'not selected'}</span>
+              <span class="chip ${state.badgeClass}">${escapeHtml(state.decryptability)}</span>
             </div>
             <p class="muted">${escapeHtml(state.summary)}</p>
-          </div>
+          </article>
         `;
-      }).join("");
+      }).join('');
+    }
+
+    function renderManifestView() {
+      refs.manifestView.textContent = JSON.stringify(buildManifest(), null, 2);
+    }
+
+    function renderOutput() {
+      refs.outputMessage.className = `output-message output-${app.output.kind}`;
+      refs.outputMessage.textContent = app.output.message;
+    }
+
+    function updateUi() {
+      renderHeader();
+      renderStatusCards();
+      renderControls();
+      renderPhaseLead();
+      renderBottlePanel();
+      renderSelectionPanel();
+      renderFlowDiagram();
+      renderArchiveMap();
+      renderChunkVisualization();
+      renderManifestView();
+      renderOutput();
     }
 
     function downloadBlob(blob, filename) {
       const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
+      const anchor = document.createElement('a');
       anchor.href = url;
       anchor.download = filename;
+      anchor.style.display = 'none';
+      document.body.appendChild(anchor);
       anchor.click();
+      anchor.remove();
       setTimeout(() => URL.revokeObjectURL(url), 0);
     }
 
-    function updateStatus() {
-      const status = document.getElementById("status");
-
-      if (!archive) {
-        status.textContent = "No archive sealed.";
+    function toggleChunkKeep(chunkId) {
+      if (!canToggleKeep() || !app.archive) {
         return;
       }
-
-      const currentRemainingBytes = remainingBytes();
-      const currentSelectedKeepBytes = selectedKeepBytes();
-      const decryptAllowed = currentRemainingBytes <= archive.thresholdBytes;
-
-      status.innerHTML = `
-        <div class="status-grid">
-          <div class="status-card">
-            <strong>Input file</strong>
-            <span>${escapeHtml(archive.inputName)}</span>
-          </div>
-          <div class="status-card">
-            <strong>Total original bytes</strong>
-            <span>${formatBytes(archive.totalBytes)}</span>
-          </div>
-          <div class="status-card">
-            <strong>Remaining bytes</strong>
-            <span>${formatBytes(currentRemainingBytes)}</span>
-          </div>
-          <div class="status-card">
-            <strong>Selected keep bytes</strong>
-            <span>${formatBytes(currentSelectedKeepBytes)}</span>
-          </div>
-          <div class="status-card">
-            <strong>Threshold bytes</strong>
-            <span>${formatBytes(archive.thresholdBytes)}</span>
-          </div>
-          <div class="status-card">
-            <strong>State version</strong>
-            <span>${archive.stateVersion}</span>
-          </div>
-          <div class="status-card">
-            <strong>Decrypt status</strong>
-            <span class="${decryptAllowed ? "allowed" : "refused"}">${decryptAllowed ? "allowed" : "refused"}</span>
-          </div>
-        </div>
-      `;
-    }
-
-    function updateChunks() {
-      const chunksElement = document.getElementById("chunks");
-
-      if (!archive) {
-        chunksElement.textContent = "No chunks available.";
+      const chunk = app.archive.chunks.find((entry) => entry.id === chunkId);
+      if (!chunk || chunk.destroyed) {
         return;
       }
+      chunk.keep = !chunk.keep;
+      app.archive.lastAction = 'selected';
+      setOutput('info', `Keep set updated: chunk ${chunk.id} is now ${chunk.keep ? 'selected to survive prune' : 'marked removable'}. Weak-model browser state only.`);
+      updateUi();
+    }
 
-      chunksElement.innerHTML = "";
-
-      if (archive.chunks.length === 0) {
-        chunksElement.textContent = "No chunks available.";
+    function setAllKeeps(value) {
+      if (!canToggleKeep() || !app.archive) {
         return;
       }
-
-      for (const chunk of archive.chunks) {
-        const row = document.createElement("div");
-        row.className = "chunk";
-
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.checked = chunk.keep;
-        checkbox.disabled = chunk.destroyed;
-        checkbox.addEventListener("change", () => {
-          chunk.keep = checkbox.checked;
-          archive.lastAction = "selected";
-          updateUi();
-        });
-
-        const label = document.createElement("div");
-        label.innerHTML = `
-          <strong>${chunk.id}</strong>
-          <div class="muted">
-            ${formatBytes(chunk.plaintextSize)} bytes ·
-            ${chunk.destroyed ? "destroyed" : "available"} ·
-            capsule ${chunk.keyCapsule === null ? "deleted" : "present"}
-          </div>
-        `;
-
-        row.appendChild(checkbox);
-        row.appendChild(label);
-        chunksElement.appendChild(row);
+      for (const chunk of app.archive.chunks) {
+        if (!chunk.destroyed) {
+          chunk.keep = value;
+        }
       }
-    }
-
-    function updateButtons() {
-      const pruneButton = document.getElementById("pruneButton");
-      const decryptButton = document.getElementById("decryptButton");
-      const manifestButton = document.getElementById("manifestButton");
-
-      if (!archive) {
-        pruneButton.disabled = true;
-        decryptButton.disabled = true;
-        manifestButton.disabled = true;
-        return;
-      }
-
-      const currentRemainingBytes = remainingBytes();
-      const currentSelectedKeepBytes = selectedKeepBytes();
-      pruneButton.disabled =
-        currentSelectedKeepBytes > archive.thresholdBytes ||
-        currentChunks().length === 0 ||
-        !hasPrunableChunks();
-      decryptButton.disabled = currentRemainingBytes > archive.thresholdBytes;
-      manifestButton.disabled = false;
-    }
-
-    function updateManifestView() {
-      document.getElementById("manifestView").textContent = JSON.stringify(buildManifest(), null, 2);
-    }
-
-    function updateUi() {
-      updateStatus();
-      updateVisualization();
-      updateChunks();
-      updateButtons();
-      updateManifestView();
+      app.archive.lastAction = 'selected';
+      setOutput('info', value
+        ? 'All live chunks were added to the keep set. Prune will stay disabled until the keep set fits beneath the threshold.'
+        : 'Keep set cleared. All live chunks are currently removable.'
+      );
+      updateUi();
     }
 
     async function sealArchive() {
-      const fileInput = document.getElementById("fileInput");
-      const thresholdInput = document.getElementById("thresholdInput");
-      const chunkSizeInput = document.getElementById("chunkSizeInput");
-
-      const file = fileInput.files[0];
-      const thresholdBytes = Number(thresholdInput.value);
-      const chunkSizeBytes = Number(chunkSizeInput.value);
+      const file = refs.fileInput.files[0];
+      const thresholdBytes = Number(refs.thresholdInput.value);
+      const chunkSizeBytes = Number(refs.chunkSizeInput.value);
 
       if (!file) {
-        throw new Error("Choose a file first.");
+        throw new Error('Choose a file first.');
       }
       if (!Number.isFinite(thresholdBytes) || thresholdBytes <= 0) {
-        throw new Error("Threshold must be a positive integer.");
+        throw new Error('Threshold must be a positive integer.');
       }
       if (!Number.isFinite(chunkSizeBytes) || chunkSizeBytes < 1024) {
-        throw new Error("Chunk size must be at least 1024 bytes.");
+        throw new Error('Chunk size must be at least 1024 bytes.');
       }
+
+      app.phase = 'sealing';
+      setOutput('info', 'Sealing file into browser-memory chunk capsules...');
+      updateUi();
 
       const fileBytes = new Uint8Array(await file.arrayBuffer());
       const chunks = [];
 
       for (let offset = 0, index = 0; offset < fileBytes.length; offset += chunkSizeBytes, index += 1) {
-        const chunkId = String(index).padStart(8, "0");
+        const chunkId = String(index).padStart(8, '0');
         const plaintext = fileBytes.slice(offset, Math.min(offset + chunkSizeBytes, fileBytes.length));
         const keyBytes = randomBytes(32);
         const encrypted = await encryptChunk(plaintext, keyBytes, chunkId);
@@ -1113,11 +2182,12 @@
           ciphertextHash,
           keyCapsule: keyBytes,
           destroyed: false,
-          keep: false
+          keep: false,
+          pruning: false
         });
       }
 
-      archive = {
+      app.archive = {
         archiveId: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
         inputName: file.name,
@@ -1125,53 +2195,74 @@
         chunkSizeBytes,
         totalBytes: fileBytes.byteLength,
         stateVersion: 0,
-        lastAction: "sealed",
+        lastAction: 'sealed',
         chunks
       };
 
       updateUi();
+      await sleep(Math.min(900, 220 + chunks.length * 55));
+      app.phase = 'sealed';
+      setOutput('info', `Archive sealed: ${formatBytes(fileBytes.byteLength)} across ${chunks.length} chunk${chunks.length === 1 ? '' : 's'}. Weak-model warning still applies.`);
+      updateUi();
     }
 
-    function pruneArchive() {
-      if (!archive) {
-        throw new Error("No archive is loaded.");
+    async function pruneArchive() {
+      if (!app.archive) {
+        throw new Error('No archive is loaded.');
       }
-
       const keepBytes = selectedKeepBytes();
-      if (keepBytes > archive.thresholdBytes) {
-        throw new Error("Keep set exceeds the threshold.");
+      if (keepBytes > app.archive.thresholdBytes) {
+        throw new Error('Keep set exceeds the threshold.');
       }
 
-      for (const chunk of archive.chunks) {
-        if (chunk.destroyed) {
-          continue;
+      app.phase = 'pruning';
+      app.archive.lastAction = 'pruning';
+      let candidateCount = 0;
+      for (const chunk of app.archive.chunks) {
+        if (!chunk.destroyed && !chunk.keep) {
+          chunk.pruning = true;
+          candidateCount += 1;
         }
-        if (!chunk.keep) {
+      }
+      setOutput('info', `Pruning ${candidateCount} non-selected chunk${candidateCount === 1 ? '' : 's'} by deleting simulated capsules from browser memory...`);
+      updateUi();
+      await sleep(560);
+
+      let prunedCount = 0;
+      for (const chunk of app.archive.chunks) {
+        if (chunk.pruning) {
           chunk.keyCapsule = null;
           chunk.destroyed = true;
           chunk.keep = false;
+          chunk.pruning = false;
+          prunedCount += 1;
         }
       }
 
-      archive.stateVersion += 1;
-      archive.lastAction = "pruned";
+      app.archive.stateVersion += 1;
+      app.archive.lastAction = 'pruned';
+      app.phase = 'pruned';
+      setOutput('success', `Pruned ${prunedCount} chunk${prunedCount === 1 ? '' : 's'} by deleting simulated browser-memory capsules. A strong model would need irreversible trusted destruction.`);
       updateUi();
     }
 
     async function decryptRemaining() {
-      if (!archive) {
-        throw new Error("No archive is loaded.");
+      if (!app.archive) {
+        throw new Error('No archive is loaded.');
       }
 
-      const currentRemainingChunks = currentChunks();
-      const currentRemainingBytes = remainingBytes();
-
-      if (currentRemainingBytes > archive.thresholdBytes) {
-        throw new Error("Remaining archive exceeds the threshold. Decryption refused.");
+      const liveChunks = currentChunks();
+      const remaining = remainingBytes();
+      if (remaining > app.archive.thresholdBytes) {
+        throw new Error('Remaining archive exceeds the threshold. Decryption refused.');
       }
+
+      app.phase = 'decrypting';
+      setOutput('info', 'Decrypting the residual archive inside the browser...');
+      updateUi();
 
       const plaintextChunks = [];
-      for (const chunk of currentRemainingChunks) {
+      for (const chunk of liveChunks) {
         if (chunk.keyCapsule === null) {
           throw new Error(`Missing key capsule for chunk ${chunk.id}.`);
         }
@@ -1188,66 +2279,151 @@
       const totalBytes = plaintextChunks.reduce((sum, chunk) => sum + chunk.byteLength, 0);
       const merged = new Uint8Array(totalBytes);
       let offset = 0;
-
       for (const chunk of plaintextChunks) {
         merged.set(chunk, offset);
         offset += chunk.byteLength;
       }
 
-      const filename = archive.inputName.replace(/(\.[^.]+)?$/, "-residual$1");
-      downloadBlob(new Blob([merged], { type: "application/octet-stream" }), filename);
-      archive.lastAction = "decrypted";
+      const residualHash = await sha256(merged);
+      const filename = app.archive.inputName.replace(/(\.[^.]+)?$/, '-residual$1');
+      downloadBlob(new Blob([merged], { type: 'application/octet-stream' }), filename);
+      app.archive.lastAction = 'decrypted';
+      app.phase = 'decrypted';
+      setOutput('success', `Residual download started: ${filename} (${formatBytes(totalBytes)}, SHA-256 ${residualHash.slice(0, 16)}…). Weak-model note: browser state can still be copied or rolled back.`);
       updateUi();
     }
 
     function exportManifest() {
-      if (!archive) {
-        throw new Error("No archive is loaded.");
+      if (!app.archive) {
+        throw new Error('No archive is loaded.');
       }
       const manifestText = JSON.stringify(buildManifest(), null, 2);
-      downloadBlob(new Blob([manifestText], { type: "application/json" }), "bottleship-manifest.json");
-    }
-
-    function resetDemo() {
-      archive = null;
-      document.getElementById("fileInput").value = "";
+      downloadBlob(new Blob([manifestText], { type: 'application/json' }), 'bottleship-manifest.json');
+      setOutput('info', 'Manifest export started. Remember: the manifest is descriptive weak-model metadata, not trusted state.');
       updateUi();
     }
 
-    document.getElementById("sealButton").addEventListener("click", async () => {
+    function resetDemo() {
+      app.archive = null;
+      app.phase = 'idle';
+      refs.fileInput.value = '';
+      setOutput('idle', 'Demo reset. Choose a file to seal a fresh weak-model archive.');
+      updateUi();
+    }
+
+    function handleError(error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (app.archive) {
+        for (const chunk of app.archive.chunks) {
+          chunk.pruning = false;
+        }
+        if (app.archive.lastAction === 'pruning') {
+          app.archive.lastAction = 'sealed';
+        }
+      }
+      if (isBusy()) {
+        if (!app.archive) {
+          app.phase = 'idle';
+        } else if (app.archive.lastAction === 'decrypted') {
+          app.phase = 'decrypted';
+        } else if (app.archive.lastAction === 'pruned') {
+          app.phase = 'pruned';
+        } else {
+          app.phase = 'sealed';
+        }
+      }
+      setOutput('danger', message);
+      updateUi();
+      alert(message);
+    }
+
+    refs.fileInput.addEventListener('change', () => {
+      updateUi();
+    });
+
+    refs.thresholdInput.addEventListener('input', () => {
+      updateUi();
+    });
+
+    refs.chunkSizeInput.addEventListener('input', () => {
+      updateUi();
+    });
+
+    refs.sealButton.addEventListener('click', async () => {
       try {
         await sealArchive();
       } catch (error) {
-        alert(error.message);
+        handleError(error);
       }
     });
 
-    document.getElementById("pruneButton").addEventListener("click", () => {
+    refs.resetButton.addEventListener('click', () => {
+      resetDemo();
+    });
+
+    refs.selectAllButton.addEventListener('click', () => {
+      setAllKeeps(true);
+    });
+
+    refs.clearAllButton.addEventListener('click', () => {
+      setAllKeeps(false);
+    });
+
+    refs.pruneButton.addEventListener('click', async () => {
       try {
-        pruneArchive();
+        await pruneArchive();
       } catch (error) {
-        alert(error.message);
+        handleError(error);
       }
     });
 
-    document.getElementById("decryptButton").addEventListener("click", async () => {
+    refs.decryptButton.addEventListener('click', async () => {
       try {
         await decryptRemaining();
       } catch (error) {
-        alert(error.message);
+        handleError(error);
       }
     });
 
-    document.getElementById("manifestButton").addEventListener("click", () => {
+    refs.manifestButton.addEventListener('click', () => {
       try {
         exportManifest();
       } catch (error) {
-        alert(error.message);
+        handleError(error);
       }
     });
 
-    document.getElementById("resetButton").addEventListener("click", () => {
-      resetDemo();
+    refs.chunks.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-chunk-id]');
+      if (!button) {
+        return;
+      }
+      const chunkId = button.getAttribute('data-chunk-id');
+      if (chunkId) {
+        toggleChunkKeep(chunkId);
+      }
+    });
+
+    refs.archiveMap.addEventListener('click', (event) => {
+      const segment = event.target.closest('[data-chunk-id]');
+      if (!segment) {
+        return;
+      }
+      const chunkId = segment.getAttribute('data-chunk-id');
+      if (chunkId) {
+        toggleChunkKeep(chunkId);
+      }
+    });
+
+    refs.bottleSvg.addEventListener('click', (event) => {
+      const segment = event.target.closest('[data-chunk-id]');
+      if (!segment) {
+        return;
+      }
+      const chunkId = segment.getAttribute('data-chunk-id');
+      if (chunkId) {
+        toggleChunkKeep(chunkId);
+      }
     });
 
     updateUi();
