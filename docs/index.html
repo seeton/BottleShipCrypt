@@ -714,6 +714,52 @@
       box-shadow: inset 0 0 0 1px rgba(45, 232, 176, 0.18);
     }
 
+    .archive-image-strip {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .archive-image-segment {
+      appearance: none;
+      width: 100%;
+      padding: 12px;
+      text-align: left;
+      font: inherit;
+      color: inherit;
+    }
+
+    .archive-image-segment:disabled {
+      cursor: default;
+    }
+
+    .archive-image-window {
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid rgba(113, 183, 223, 0.14);
+      background: rgba(3, 8, 19, 0.86);
+      min-height: 34px;
+    }
+
+    .archive-image-window img {
+      display: block;
+      width: 100%;
+      object-fit: cover;
+      object-position: center top;
+    }
+
+    .archive-image-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 10px;
+    }
+
+    .archive-image-meta strong {
+      font-size: 0.9rem;
+    }
+
     .legend {
       align-items: center;
       color: var(--text-dim);
@@ -877,6 +923,33 @@
       gap: 10px;
       align-items: flex-start;
       margin-bottom: 10px;
+    }
+
+    .chunk-card-image {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .chunk-card-image-window {
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid rgba(113, 183, 223, 0.12);
+      background: rgba(3, 8, 19, 0.82);
+    }
+
+    .chunk-card-image-window img {
+      display: block;
+      width: 100%;
+      object-fit: cover;
+      object-position: center top;
+    }
+
+    .chunk-row-label {
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
     pre {
@@ -1057,6 +1130,88 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
+    }
+
+    .mode-toggle {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .mode-btn {
+      appearance: none;
+      border-radius: 12px;
+      border: 1px solid rgba(113, 183, 223, 0.18);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-dim);
+      padding: 11px 12px;
+      font: inherit;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease, background 0.18s ease;
+    }
+
+    .mode-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      color: var(--text);
+    }
+
+    .mode-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.38;
+    }
+
+    .mode-btn.active-file {
+      background: rgba(201, 168, 76, 0.14);
+      border-color: rgba(244, 200, 74, 0.56);
+      color: var(--gold-glow);
+      box-shadow: 0 0 18px rgba(201, 168, 76, 0.16);
+    }
+
+    .mode-btn.active-image {
+      background: rgba(45, 232, 176, 0.12);
+      border-color: rgba(45, 232, 176, 0.4);
+      color: var(--sea);
+      box-shadow: 0 0 18px rgba(45, 232, 176, 0.12);
+    }
+
+    .source-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .source-panel[hidden] {
+      display: none;
+    }
+
+    .image-preview-shell {
+      min-height: 0;
+    }
+
+    .image-preview-card {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(113, 183, 223, 0.16);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .image-preview-card img {
+      display: block;
+      width: 100%;
+      max-height: 220px;
+      object-fit: contain;
+      background: rgba(3, 8, 19, 0.82);
+    }
+
+    .image-preview-meta {
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
     }
 
     .config-grid {
@@ -1263,10 +1418,32 @@
         <div class="panel-body">
           <div class="file-well">
             <div class="field">
-              <label for="fileInput">Input file</label>
-              <input id="fileInput" type="file">
+              <div class="field-legend">Input mode</div>
+              <div class="mode-toggle" role="tablist" aria-label="Draft input mode">
+                <button id="modeFileButton" type="button" class="mode-btn active-file" aria-pressed="true">Generic file</button>
+                <button id="modeImageButton" type="button" class="mode-btn" aria-pressed="false">Image view</button>
+              </div>
             </div>
-            <div id="fileMeta" class="file-meta">No file chosen.</div>
+
+            <div id="fileSourcePanel" class="source-panel">
+              <div class="field">
+                <label for="fileInput">Input file</label>
+                <input id="fileInput" type="file">
+              </div>
+              <div id="fileMeta" class="file-meta">No file chosen.</div>
+            </div>
+
+            <div id="imageSourcePanel" class="source-panel" hidden>
+              <div class="button-row">
+                <button id="sampleImageButton" type="button" class="btn btn-primary">Load sample image</button>
+                <button id="imageUploadButton" type="button" class="btn btn-ghost">Upload image</button>
+              </div>
+              <input id="imageInput" type="file" accept="image/*" hidden>
+              <div id="imageMeta" class="file-meta">No image chosen.</div>
+              <div id="imagePreview" class="image-preview-shell">
+                <div class="empty-state">Load the built-in sample image or upload your own image to try the visualization.</div>
+              </div>
+            </div>
           </div>
 
           <div class="config-grid">
@@ -1281,7 +1458,7 @@
             </div>
           </div>
 
-          <div class="note-box">
+          <div id="modeHint" class="note-box">
             Seal a file into individually encrypted chunks. If the remaining decryptable bytes stay above the threshold,
             decryption is refused until the residual archive is pruned smaller. In a strong model, that refusal must come from a trusted, rollback-resistant component—not this page.
           </div>
@@ -1291,7 +1468,7 @@
             <button id="resetButton" class="btn btn-ghost">Reset demo</button>
           </div>
 
-          <div class="subtle-text control-microcopy">Draft input changes apply the next time you seal. Reset clears the current archive and the selected file.</div>
+          <div class="subtle-text control-microcopy">Draft input changes apply the next time you seal. Reset clears the current archive and the selected source.</div>
         </div>
       </section>
 
@@ -1359,7 +1536,7 @@
 
     <section class="output-bar">
       <div class="output-label">Residual output</div>
-      <div id="outputMessage" class="output-message output-idle">No decrypt action yet. Seal a file to start the weak-model voyage.</div>
+      <div id="outputMessage" class="output-message output-idle">No decrypt action yet. Seal a file or image to start the weak-model voyage.</div>
     </section>
   </div>
 
@@ -1401,13 +1578,22 @@
     const mastPath = 'M 107,10 L 113,10 L 113,2 L 107,2 Z';
     const sailLeft = 'M 108,12 C 70,30 50,60 55,85 L 108,75 Z';
     const sailRight = 'M 112,12 C 150,30 170,60 165,85 L 112,75 Z';
+    const BOTTLE_IMAGE_X = 48;
+    const BOTTLE_IMAGE_Y = 68;
+    const BOTTLE_IMAGE_W = 124;
+    const BOTTLE_IMAGE_H = 224;
+    const IMAGE_SLICE_PREVIEW_HEIGHT = 220;
 
     const app = {
       archive: null,
       phase: 'idle',
+      draft: {
+        sourceMode: 'file',
+        imageAsset: null
+      },
       output: {
         kind: 'idle',
-        message: 'No decrypt action yet. Seal a file to start the weak-model voyage.'
+        message: 'No decrypt action yet. Seal a file or image to start the weak-model voyage.'
       }
     };
 
@@ -1415,8 +1601,18 @@
       phaseBadge: document.getElementById('phaseBadge'),
       statusCards: document.getElementById('statusCards'),
       guidanceBanner: document.getElementById('guidanceBanner'),
+      modeFileButton: document.getElementById('modeFileButton'),
+      modeImageButton: document.getElementById('modeImageButton'),
+      fileSourcePanel: document.getElementById('fileSourcePanel'),
+      imageSourcePanel: document.getElementById('imageSourcePanel'),
       fileInput: document.getElementById('fileInput'),
       fileMeta: document.getElementById('fileMeta'),
+      imageInput: document.getElementById('imageInput'),
+      sampleImageButton: document.getElementById('sampleImageButton'),
+      imageUploadButton: document.getElementById('imageUploadButton'),
+      imageMeta: document.getElementById('imageMeta'),
+      imagePreview: document.getElementById('imagePreview'),
+      modeHint: document.getElementById('modeHint'),
       thresholdInput: document.getElementById('thresholdInput'),
       chunkSizeInput: document.getElementById('chunkSizeInput'),
       sealButton: document.getElementById('sealButton'),
@@ -1516,6 +1712,270 @@
       return `${new Intl.NumberFormat('en-US').format(value)} bytes`;
     }
 
+    function currentDraftSource() {
+      if (app.draft.sourceMode === 'image') {
+        return app.draft.imageAsset ? { kind: 'image', image: app.draft.imageAsset } : null;
+      }
+      const file = refs.fileInput.files[0];
+      return file ? { kind: 'file', file } : null;
+    }
+
+    function normalizeImageChunkSize(chunkSizeBytes, rowBytes) {
+      const requested = Number(chunkSizeBytes);
+      const rowsPerChunk = Math.max(1, Math.round((Number.isFinite(requested) ? requested : rowBytes) / rowBytes) || 1);
+      return rowsPerChunk * rowBytes;
+    }
+
+    function suggestImageParameters(imageAsset) {
+      const rowsPerChunk = Math.max(1, Math.ceil(imageAsset.height / 8));
+      let thresholdRows = Math.max(rowsPerChunk, Math.floor(imageAsset.height * 0.42));
+      if (imageAsset.height > 1) {
+        thresholdRows = Math.min(imageAsset.height - 1, thresholdRows);
+      }
+      return {
+        chunkSizeBytes: imageAsset.rowBytes * rowsPerChunk,
+        thresholdBytes: imageAsset.rowBytes * Math.max(1, thresholdRows)
+      };
+    }
+
+    function applySuggestedImageParameters(imageAsset) {
+      const suggestion = suggestImageParameters(imageAsset);
+      refs.chunkSizeInput.value = String(suggestion.chunkSizeBytes);
+      refs.thresholdInput.value = String(suggestion.thresholdBytes);
+    }
+
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(reader.error || new Error('Failed to read image file.'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function loadImageElement(src) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error('Failed to decode image.'));
+        image.src = src;
+      });
+    }
+
+    function buildImageAssetFromCanvas(canvas, name, sourceLabel) {
+      const context = canvas.getContext('2d');
+      if (!context) {
+        throw new Error('Canvas 2D context is unavailable in this browser.');
+      }
+      const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+      return {
+        name,
+        sourceLabel,
+        previewUrl: canvas.toDataURL('image/png'),
+        bytes: new Uint8Array(imageData.data),
+        width: canvas.width,
+        height: canvas.height,
+        rowBytes: canvas.width * 4
+      };
+    }
+
+    async function createImageAssetFromFile(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        throw new Error('Choose an image file to use image mode.');
+      }
+      const sourceUrl = await readFileAsDataUrl(file);
+      const image = await loadImageElement(sourceUrl);
+      const maxWidth = 280;
+      const maxHeight = 190;
+      const scale = Math.min(1, maxWidth / image.naturalWidth, maxHeight / image.naturalHeight);
+      const width = Math.max(1, Math.round(image.naturalWidth * scale));
+      const height = Math.max(1, Math.round(image.naturalHeight * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext('2d');
+      if (!context) {
+        throw new Error('Canvas 2D context is unavailable in this browser.');
+      }
+      context.drawImage(image, 0, 0, width, height);
+      return buildImageAssetFromCanvas(canvas, file.name, `Uploaded image · normalized to ${width}×${height}px RGBA rows`);
+    }
+
+    function createSampleImageAsset() {
+      const width = 240;
+      const height = 160;
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext('2d');
+      if (!context) {
+        throw new Error('Canvas 2D context is unavailable in this browser.');
+      }
+
+      const sky = context.createLinearGradient(0, 0, 0, height * 0.62);
+      sky.addColorStop(0, '#173764');
+      sky.addColorStop(0.42, '#4b86b8');
+      sky.addColorStop(1, '#7fc5f7');
+      context.fillStyle = sky;
+      context.fillRect(0, 0, width, height);
+
+      const sun = context.createRadialGradient(178, 34, 4, 178, 34, 34);
+      sun.addColorStop(0, 'rgba(255, 236, 166, 0.95)');
+      sun.addColorStop(1, 'rgba(255, 236, 166, 0)');
+      context.fillStyle = sun;
+      context.beginPath();
+      context.arc(178, 34, 34, 0, Math.PI * 2);
+      context.fill();
+
+      context.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      context.beginPath();
+      context.arc(54, 30, 14, Math.PI, 0);
+      context.arc(72, 28, 16, Math.PI, 0);
+      context.arc(92, 33, 14, Math.PI, 0);
+      context.closePath();
+      context.fill();
+
+      const sea = context.createLinearGradient(0, height * 0.58, 0, height);
+      sea.addColorStop(0, '#0f5a73');
+      sea.addColorStop(0.48, '#0b3955');
+      sea.addColorStop(1, '#071727');
+      context.fillStyle = sea;
+      context.fillRect(0, height * 0.58, width, height * 0.42);
+
+      context.strokeStyle = 'rgba(180, 240, 255, 0.22)';
+      context.lineWidth = 3;
+      for (let wave = 0; wave < 4; wave += 1) {
+        const y = 100 + wave * 14;
+        context.beginPath();
+        context.moveTo(-20, y);
+        for (let x = -20; x <= width + 20; x += 26) {
+          context.quadraticCurveTo(x + 13, y + (wave % 2 === 0 ? 5 : -5), x + 26, y);
+        }
+        context.stroke();
+      }
+
+      context.save();
+      context.translate(118, 70);
+
+      context.fillStyle = '#432b14';
+      context.beginPath();
+      context.moveTo(-54, 54);
+      context.lineTo(56, 54);
+      context.quadraticCurveTo(44, 74, -22, 78);
+      context.quadraticCurveTo(-76, 74, -54, 54);
+      context.fill();
+
+      context.fillStyle = '#65421f';
+      context.fillRect(-4, -8, 8, 62);
+
+      context.fillStyle = 'rgba(238, 219, 176, 0.96)';
+      context.beginPath();
+      context.moveTo(0, -6);
+      context.lineTo(-42, 22);
+      context.quadraticCurveTo(-20, 34, 0, 30);
+      context.closePath();
+      context.fill();
+
+      context.beginPath();
+      context.moveTo(8, 2);
+      context.lineTo(44, 26);
+      context.quadraticCurveTo(20, 38, 6, 34);
+      context.closePath();
+      context.fill();
+
+      context.strokeStyle = 'rgba(255, 245, 220, 0.22)';
+      context.lineWidth = 1.4;
+      context.beginPath();
+      context.moveTo(0, -8);
+      context.lineTo(-44, 22);
+      context.lineTo(0, 30);
+      context.closePath();
+      context.stroke();
+
+      context.beginPath();
+      context.moveTo(8, 2);
+      context.lineTo(44, 26);
+      context.lineTo(6, 34);
+      context.closePath();
+      context.stroke();
+
+      context.fillStyle = '#c24b2a';
+      context.beginPath();
+      context.moveTo(0, -14);
+      context.lineTo(30, -6);
+      context.lineTo(0, 2);
+      context.closePath();
+      context.fill();
+
+      context.restore();
+
+      context.fillStyle = 'rgba(255, 232, 170, 0.22)';
+      context.fillRect(96, 116, 58, 6);
+
+      return buildImageAssetFromCanvas(canvas, 'sample-bottleship.png', 'Built-in sample image');
+    }
+
+    function chunkRowLabel(chunk) {
+      if (typeof chunk.rowStart !== 'number' || typeof chunk.rowCount !== 'number') {
+        return '';
+      }
+      const end = chunk.rowStart + chunk.rowCount - 1;
+      return chunk.rowCount === 1 ? `row ${chunk.rowStart}` : `rows ${chunk.rowStart}-${end}`;
+    }
+
+    function imageSliceMetrics(chunk, imageHeight, fullHeight, minWindowHeight = 34) {
+      const top = (chunk.rowStart / imageHeight) * fullHeight;
+      const windowHeight = Math.max(minWindowHeight, Math.round((chunk.rowCount / imageHeight) * fullHeight));
+      return { top, windowHeight };
+    }
+
+    function renderImagePreview(asset) {
+      if (!asset) {
+        return '<div class="empty-state">Load the built-in sample image or upload your own image to try the visualization.</div>';
+      }
+      return `
+        <div class="image-preview-card">
+          <img src="${escapeHtml(asset.previewUrl)}" alt="Selected source image preview">
+          <div class="image-preview-meta">
+            <strong>${escapeHtml(asset.name)}</strong>
+            <span>${escapeHtml(asset.sourceLabel)}</span>
+            <span>${asset.width}×${asset.height}px · ${formatBytes(asset.bytes.byteLength)} of normalized RGBA data</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function makeCanvasFromRgba(bytes, width, height) {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext('2d');
+      if (!context) {
+        throw new Error('Canvas 2D context is unavailable in this browser.');
+      }
+      const imageData = context.createImageData(width, height);
+      imageData.data.set(bytes);
+      context.putImageData(imageData, 0, 0);
+      return canvas;
+    }
+
+    function rgbaBytesToDataUrl(bytes, width, height) {
+      return makeCanvasFromRgba(bytes, width, height).toDataURL('image/png');
+    }
+
+    function rgbaBytesToBlob(bytes, width, height) {
+      const canvas = makeCanvasFromRgba(bytes, width, height);
+      return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            reject(new Error('Failed to encode the residual image preview.'));
+            return;
+          }
+          resolve(blob);
+        }, 'image/png');
+      });
+    }
+
     function currentChunks() {
       return app.archive ? app.archive.chunks.filter((chunk) => !chunk.destroyed) : [];
     }
@@ -1586,11 +2046,12 @@
         return {};
       }
 
-      return {
+      const manifest = {
         format: formatName,
         warning: 'Weak browser demo only. Strong model requires trusted rollback-resistant state and irreversible capsule destruction.',
         archiveId: app.archive.archiveId,
         inputName: app.archive.inputName,
+        inputKind: app.archive.inputKind,
         createdAt: app.archive.createdAt,
         thresholdBytes: app.archive.thresholdBytes,
         chunkSizeBytes: app.archive.chunkSizeBytes,
@@ -1610,9 +2071,25 @@
           ciphertextHash: chunk.ciphertextHash,
           capsulePresent: chunk.keyCapsule !== null,
           destroyed: chunk.destroyed,
-          keep: chunk.keep
+          keep: chunk.keep,
+          byteOffset: chunk.offset,
+          ...(typeof chunk.rowStart === 'number' ? {
+            rowStart: chunk.rowStart,
+            rowCount: chunk.rowCount
+          } : {})
         }))
       };
+
+      if (app.archive.image) {
+        manifest.imageVisualization = {
+          width: app.archive.image.width,
+          height: app.archive.image.height,
+          rowBytes: app.archive.image.rowBytes,
+          representation: 'normalized-rgba-rows'
+        };
+      }
+
+      return manifest;
     }
 
     function describeChunkState(chunk, decryptAllowed) {
@@ -1669,6 +2146,7 @@
       const prefix = svgIdPrefix();
       const sliceHeight = chunks.length > 0 ? SHIP_H / chunks.length : SHIP_H;
       const bottleClass = app.phase === 'decrypted' ? 'decrypted-glow' : '';
+      const imageArchive = app.archive && app.archive.inputKind === 'image' && app.archive.image;
 
       const clipMarkup = chunks.map((chunk, index) => `
           <clipPath id="${prefix}-clip-${index}">
@@ -1676,41 +2154,112 @@
           </clipPath>
       `).join('');
 
-      const segmentMarkup = chunks.map((chunk, index) => {
-        const state = describeChunkState(chunk, decryptAllowed);
-        const fill = state.tone === 'pruned'
-          ? 'rgba(255,255,255,0.02)'
-          : state.tone === 'keep'
-            ? '#2de8b0'
-            : state.tone === 'decryptable'
-              ? '#a88cff'
-              : '#e8832a';
-        const animationClass = [
-          'bottle-chunk-seg',
-          app.phase === 'sealing' ? 'sealing' : '',
-          chunk.pruning ? 'pruning' : '',
-          app.phase === 'decrypted' && !chunk.destroyed ? 'decrypted-glow' : ''
-        ].filter(Boolean).join(' ');
-        const pointer = canToggleKeep() && !chunk.destroyed ? 'cursor:pointer;' : '';
-        return `
-          <g clip-path="url(#${prefix}-clip-${index})">
-            <path
-              d="${shipPath}"
-              transform="translate(0,30)"
-              fill="${fill}"
-              opacity="${chunk.destroyed ? '0.10' : '0.96'}"
-              class="${animationClass}"
-              data-chunk-id="${escapeHtml(chunk.id)}"
-              style="${pointer}animation-delay:${(index * 0.06).toFixed(2)}s;"
-            ></path>
-          </g>
-        `;
-      }).join('');
+      const imageClipMarkup = imageArchive
+        ? chunks.map((chunk, index) => {
+            const top = BOTTLE_IMAGE_Y + (chunk.rowStart / app.archive.image.height) * BOTTLE_IMAGE_H;
+            const height = Math.max(2, (chunk.rowCount / app.archive.image.height) * BOTTLE_IMAGE_H);
+            return `
+              <clipPath id="${prefix}-image-clip-${index}">
+                <rect x="${BOTTLE_IMAGE_X}" y="${top.toFixed(2)}" width="${BOTTLE_IMAGE_W}" height="${(height + 0.8).toFixed(2)}"></rect>
+              </clipPath>
+            `;
+          }).join('')
+        : '';
+
+      const segmentMarkup = imageArchive
+        ? chunks.map((chunk, index) => {
+            const state = describeChunkState(chunk, decryptAllowed);
+            const interactive = canToggleKeep() && !chunk.destroyed;
+            const top = BOTTLE_IMAGE_Y + (chunk.rowStart / app.archive.image.height) * BOTTLE_IMAGE_H;
+            const height = Math.max(2, (chunk.rowCount / app.archive.image.height) * BOTTLE_IMAGE_H);
+            const overlayFill = state.tone === 'pruned'
+              ? 'rgba(5,18,36,0.78)'
+              : state.tone === 'keep'
+                ? 'rgba(45,232,176,0.18)'
+                : state.tone === 'decryptable'
+                  ? 'rgba(168,140,255,0.18)'
+                  : 'rgba(232,131,42,0.10)';
+            const overlayStroke = state.tone === 'pruned'
+              ? 'rgba(232,74,42,0.36)'
+              : state.tone === 'keep'
+                ? 'rgba(45,232,176,0.48)'
+                : state.tone === 'decryptable'
+                  ? 'rgba(168,140,255,0.42)'
+                  : 'rgba(201,168,76,0.22)';
+            const animationClass = [
+              'bottle-chunk-seg',
+              app.phase === 'sealing' ? 'sealing' : '',
+              chunk.pruning ? 'pruning' : '',
+              app.phase === 'decrypted' && !chunk.destroyed ? 'decrypted-glow' : ''
+            ].filter(Boolean).join(' ');
+            return `
+              <g clip-path="url(#${prefix}-image-clip-${index})">
+                <image
+                  href="${escapeHtml(app.archive.image.previewUrl)}"
+                  x="${BOTTLE_IMAGE_X}"
+                  y="${BOTTLE_IMAGE_Y}"
+                  width="${BOTTLE_IMAGE_W}"
+                  height="${BOTTLE_IMAGE_H}"
+                  preserveAspectRatio="xMidYMid slice"
+                  opacity="${chunk.destroyed ? '0.18' : '1'}"
+                  class="${animationClass}"
+                  style="animation-delay:${(index * 0.06).toFixed(2)}s;"
+                ></image>
+                <rect
+                  x="${BOTTLE_IMAGE_X}"
+                  y="${top.toFixed(2)}"
+                  width="${BOTTLE_IMAGE_W}"
+                  height="${height.toFixed(2)}"
+                  fill="${overlayFill}"
+                  stroke="${overlayStroke}"
+                  stroke-width="0.9"
+                  rx="2"
+                  ${interactive ? `data-chunk-id="${escapeHtml(chunk.id)}"` : ''}
+                  style="${interactive ? 'cursor:pointer;' : ''}"
+                ></rect>
+              </g>
+            `;
+          }).join('')
+        : chunks.map((chunk, index) => {
+            const state = describeChunkState(chunk, decryptAllowed);
+            const fill = state.tone === 'pruned'
+              ? 'rgba(255,255,255,0.02)'
+              : state.tone === 'keep'
+                ? '#2de8b0'
+                : state.tone === 'decryptable'
+                  ? '#a88cff'
+                  : '#e8832a';
+            const animationClass = [
+              'bottle-chunk-seg',
+              app.phase === 'sealing' ? 'sealing' : '',
+              chunk.pruning ? 'pruning' : '',
+              app.phase === 'decrypted' && !chunk.destroyed ? 'decrypted-glow' : ''
+            ].filter(Boolean).join(' ');
+            const pointer = canToggleKeep() && !chunk.destroyed ? 'cursor:pointer;' : '';
+            return `
+              <g clip-path="url(#${prefix}-clip-${index})">
+                <path
+                  d="${shipPath}"
+                  transform="translate(0,30)"
+                  fill="${fill}"
+                  opacity="${chunk.destroyed ? '0.10' : '0.96'}"
+                  class="${animationClass}"
+                  data-chunk-id="${escapeHtml(chunk.id)}"
+                  style="${pointer}animation-delay:${(index * 0.06).toFixed(2)}s;"
+                ></path>
+              </g>
+            `;
+          }).join('');
+
+      const imageLabel = imageArchive
+        ? `${currentChunks().length}/${chunks.length} strips`
+        : `${currentChunks().length}/${chunks.length} capsules`;
 
       return `
         <svg viewBox="-20 -50 260 440" xmlns="http://www.w3.org/2000/svg" class="bottle-glass">
           <defs>
             ${clipMarkup}
+            ${imageClipMarkup}
           </defs>
 
           <path d="
@@ -1728,9 +2277,16 @@
             L 130,-30 Z
           " fill="rgba(10,40,60,0.5)"></path>
 
+          ${imageArchive ? `
+            <rect x="${BOTTLE_IMAGE_X}" y="${BOTTLE_IMAGE_Y}" width="${BOTTLE_IMAGE_W}" height="${BOTTLE_IMAGE_H}" rx="18" fill="rgba(7,18,32,0.22)" stroke="rgba(113,183,223,0.16)" stroke-dasharray="5 6"></rect>
+          ` : ''}
+
           ${chunks.length > 0 ? segmentMarkup : ''}
 
-          ${chunks.length > 0 ? `
+          ${imageArchive ? `
+            <rect x="${BOTTLE_IMAGE_X}" y="${BOTTLE_IMAGE_Y}" width="${BOTTLE_IMAGE_W}" height="${BOTTLE_IMAGE_H}" rx="18" fill="none" stroke="${app.phase === 'decrypted' ? 'rgba(125,255,195,0.45)' : 'rgba(200,150,60,0.28)'}" stroke-width="1.1" class="${bottleClass}"></rect>
+            <text x="110" y="310" text-anchor="middle" font-size="8" fill="rgba(200,160,60,0.74)" font-family="Cinzel, serif" letter-spacing="1.4">IMAGE STRIPS</text>
+          ` : chunks.length > 0 ? `
             <g transform="translate(0,30)" opacity="${app.phase === 'decrypted' ? '0.95' : '0.35'}">
               <path d="${mastPath}" fill="rgba(180,140,80,0.7)"></path>
               <path d="${sailLeft}" fill="rgba(200,160,90,0.2)" stroke="rgba(200,160,90,0.28)" stroke-width="0.6"></path>
@@ -1776,7 +2332,7 @@
             <g transform="translate(55, 230)">
               <rect x="0" y="0" width="100" height="36" rx="4" fill="rgba(20,40,30,0.7)" stroke="rgba(100,200,160,0.25)" stroke-width="0.8"></rect>
               <text x="50" y="13" text-anchor="middle" font-size="6" fill="rgba(180,220,200,0.6)" font-family="Cinzel, serif" letter-spacing="2">BOTTLESHIP</text>
-              <text x="50" y="25" text-anchor="middle" font-size="8" fill="rgba(200,160,60,0.8)" font-family="Courier Prime, monospace">${currentChunks().length}/${chunks.length} capsules</text>
+              <text x="50" y="25" text-anchor="middle" font-size="8" fill="rgba(200,160,60,0.8)" font-family="Courier Prime, monospace">${escapeHtml(imageLabel)}</text>
             </g>
           ` : ''}
         </svg>
@@ -1790,14 +2346,23 @@
 
     function renderStatusCards() {
       if (!app.archive) {
-        const file = refs.fileInput.files[0];
+        const draft = currentDraftSource();
         const threshold = Number(refs.thresholdInput.value) || 0;
         const chunkSize = Number(refs.chunkSizeInput.value) || 0;
-        refs.statusCards.innerHTML = [
+        const cards = [
           {
             label: 'Input ready',
-            value: file ? escapeHtml(file.name) : 'No file chosen',
-            tone: file ? 'tone-good' : ''
+            value: draft
+              ? draft.kind === 'image'
+                ? `${escapeHtml(draft.image.name)} · ${draft.image.width}×${draft.image.height}px · ${formatBytes(draft.image.bytes.byteLength)}`
+                : `${escapeHtml(draft.file.name)} · ${formatBytes(draft.file.size)}`
+              : (app.draft.sourceMode === 'image' ? 'No image chosen' : 'No file chosen'),
+            tone: draft ? 'tone-good' : ''
+          },
+          {
+            label: 'Source mode',
+            value: app.draft.sourceMode === 'image' ? 'Image visualization' : 'Generic file',
+            tone: app.draft.sourceMode === 'image' ? 'tone-good' : ''
           },
           {
             label: 'Threshold',
@@ -1814,7 +2379,9 @@
             value: 'Weak model only',
             tone: 'tone-danger'
           }
-        ].map((card) => `
+        ];
+
+        refs.statusCards.innerHTML = cards.map((card) => `
           <div class="status-card">
             <div class="status-label">${card.label}</div>
             <strong class="${card.tone}">${card.value}</strong>
@@ -1828,7 +2395,8 @@
       const decryptAllowed = remainingBytes() <= app.archive.thresholdBytes;
       const activeCapsules = app.archive.chunks.filter((chunk) => chunk.keyCapsule !== null).length;
       const cards = [
-        { label: 'Input file', value: escapeHtml(app.archive.inputName) },
+        { label: app.archive.inputKind === 'image' ? 'Input image' : 'Input file', value: escapeHtml(app.archive.inputName) },
+        ...(app.archive.image ? [{ label: 'Image geometry', value: `${app.archive.image.width}×${app.archive.image.height}px`, tone: 'tone-good' }] : []),
         { label: 'Total bytes', value: formatBytes(app.archive.totalBytes) },
         { label: 'Remaining bytes', value: formatBytes(remainingBytes()), tone: decryptAllowed ? 'tone-good' : 'tone-danger' },
         { label: 'Keep-set bytes', value: formatBytes(selectedKeepBytes()), tone: selectedKeepBytes() <= app.archive.thresholdBytes ? 'tone-good' : 'tone-danger' },
@@ -1853,15 +2421,40 @@
 
     function renderControls() {
       const file = refs.fileInput.files[0];
+      const imageMode = app.draft.sourceMode === 'image';
+      const draft = currentDraftSource();
+
       refs.fileMeta.textContent = file
         ? `${file.name} · ${formatBytes(file.size)} ready for the next seal.`
         : 'No file chosen.';
+      refs.imageMeta.textContent = app.draft.imageAsset
+        ? `${app.draft.imageAsset.name} · ${app.draft.imageAsset.width}×${app.draft.imageAsset.height}px · ${formatBytes(app.draft.imageAsset.bytes.byteLength)} of normalized RGBA data.`
+        : 'No image chosen.';
+      refs.imagePreview.innerHTML = renderImagePreview(app.draft.imageAsset);
+
+      refs.fileSourcePanel.hidden = imageMode;
+      refs.imageSourcePanel.hidden = !imageMode;
+      refs.modeFileButton.className = `mode-btn${imageMode ? '' : ' active-file'}`;
+      refs.modeImageButton.className = `mode-btn${imageMode ? ' active-image' : ''}`;
+      refs.modeFileButton.setAttribute('aria-pressed', imageMode ? 'false' : 'true');
+      refs.modeImageButton.setAttribute('aria-pressed', imageMode ? 'true' : 'false');
 
       refs.fileInput.disabled = isBusy();
+      refs.imageInput.disabled = isBusy();
+      refs.modeFileButton.disabled = isBusy();
+      refs.modeImageButton.disabled = isBusy();
+      refs.sampleImageButton.disabled = isBusy();
+      refs.imageUploadButton.disabled = isBusy();
       refs.thresholdInput.disabled = isBusy();
       refs.chunkSizeInput.disabled = isBusy();
-      refs.sealButton.disabled = isBusy() || !file;
-      refs.resetButton.disabled = isBusy() || (!app.archive && !file);
+      refs.chunkSizeInput.min = imageMode ? '1' : '1024';
+
+      refs.modeHint.innerHTML = imageMode
+        ? 'Image mode seals <strong>normalized RGBA rows</strong> rather than the original file container so the bottle can show exactly which strips survive prune. The weak-model warning still applies.'
+        : 'Seal a file into individually encrypted chunks. If the remaining decryptable bytes stay above the threshold, decryption is refused until the residual archive is pruned smaller. In a strong model, that refusal must come from a trusted, rollback-resistant component—not this page.';
+
+      refs.sealButton.disabled = isBusy() || !draft;
+      refs.resetButton.disabled = isBusy() || (!app.archive && !draft);
       refs.selectAllButton.disabled = !canToggleKeep() || currentChunks().length === 0;
       refs.clearAllButton.disabled = !canToggleKeep() || currentChunks().length === 0;
       refs.pruneButton.disabled = !app.archive || app.phase !== 'sealed' || currentChunks().length === 0 || !hasPrunableChunks() || selectedKeepBytes() > app.archive.thresholdBytes;
@@ -1870,40 +2463,68 @@
     }
 
     function renderPhaseLead() {
+      const imageMode = app.draft.sourceMode === 'image';
       if (!app.archive) {
-        refs.phaseLead.textContent = 'Choose a file, set the threshold and chunk size, then seal the archive into a bottle-ship of simulated capsules.';
-        refs.bottleCaption.textContent = 'Empty vessel: no archive is loaded.';
+        if (imageMode) {
+          refs.phaseLead.textContent = app.draft.imageAsset
+            ? 'Seal the loaded image to slice it into row-aligned encrypted chunks inside the bottle. Prune removes entire image strips in this weak browser demo.'
+            : 'Load the built-in sample image or upload an image, then seal it to watch BottleShip split the picture into row-aligned chunk strips.';
+          refs.bottleCaption.textContent = 'Image mode normalizes the picture to browser RGBA rows so removed strips stay visually obvious. Weak-model only.';
+        } else {
+          refs.phaseLead.textContent = 'Choose a file, set the threshold and chunk size, then seal the archive into a bottle-ship of simulated capsules.';
+          refs.bottleCaption.textContent = 'Empty vessel: no archive is loaded.';
+        }
         return;
       }
 
       const remaining = remainingBytes();
       const threshold = app.archive.thresholdBytes;
+      const imageArchive = app.archive.inputKind === 'image';
       if (app.phase === 'sealing') {
-        refs.phaseLead.textContent = 'The bottle is being sealed: each chunk is encrypted and assigned a browser-memory capsule.';
+        refs.phaseLead.textContent = imageArchive
+          ? 'The image is being sealed: each row-aligned slice is encrypted and assigned a browser-memory capsule.'
+          : 'The bottle is being sealed: each chunk is encrypted and assigned a browser-memory capsule.';
       } else if (app.phase === 'sealed' && remaining > threshold) {
-        refs.phaseLead.textContent = 'Oversized sealed archive: choose a keep set, then prune non-selected chunks until the residual archive falls beneath the threshold.';
+        refs.phaseLead.textContent = imageArchive
+          ? 'Oversized sealed image: choose the strips that should survive prune, then discard the rest until the residual image falls beneath the threshold.'
+          : 'Oversized sealed archive: choose a keep set, then prune non-selected chunks until the residual archive falls beneath the threshold.';
       } else if (app.phase === 'sealed') {
-        refs.phaseLead.textContent = 'This sealed archive is already at or below threshold, so residual decrypt is available in the weak browser demo.';
+        refs.phaseLead.textContent = imageArchive
+          ? 'This sealed image is already at or below threshold, so residual image decrypt is available in the weak browser demo.'
+          : 'This sealed archive is already at or below threshold, so residual decrypt is available in the weak browser demo.';
       } else if (app.phase === 'pruning') {
-        refs.phaseLead.textContent = 'Non-selected chunks are being pruned by deleting simulated capsules from browser memory.';
+        refs.phaseLead.textContent = imageArchive
+          ? 'Non-selected image strips are being pruned by deleting simulated capsules from browser memory.'
+          : 'Non-selected chunks are being pruned by deleting simulated capsules from browser memory.';
       } else if (app.phase === 'pruned' && remaining > threshold) {
-        refs.phaseLead.textContent = 'Prune completed, but the remaining archive is still too large. The weak demo cannot restore destroyed capsules.';
+        refs.phaseLead.textContent = imageArchive
+          ? 'Prune completed, but the remaining image rows are still too large. The weak demo cannot restore destroyed strips.'
+          : 'Prune completed, but the remaining archive is still too large. The weak demo cannot restore destroyed capsules.';
       } else if (app.phase === 'pruned') {
-        refs.phaseLead.textContent = 'Prune completed and the remaining archive now fits beneath the threshold.';
+        refs.phaseLead.textContent = imageArchive
+          ? 'Prune completed and the remaining image rows now fit beneath the threshold.'
+          : 'Prune completed and the remaining archive now fits beneath the threshold.';
       } else if (app.phase === 'decrypting') {
-        refs.phaseLead.textContent = 'Residual decrypt is in progress inside the browser. This remains weak-model, user-controlled state.';
+        refs.phaseLead.textContent = imageArchive
+          ? 'Residual image rows are being reconstructed inside the browser. This remains weak-model, user-controlled state.'
+          : 'Residual decrypt is in progress inside the browser. This remains weak-model, user-controlled state.';
       } else {
-        refs.phaseLead.textContent = 'Residual output was decrypted and downloaded. The browser state is still weak-model and should not be treated as trusted.';
+        refs.phaseLead.textContent = imageArchive
+          ? 'Residual image rows were reconstructed and downloaded as a PNG preview. The browser state is still weak-model and should not be treated as trusted.'
+          : 'Residual output was decrypted and downloaded. The browser state is still weak-model and should not be treated as trusted.';
       }
 
-      refs.bottleCaption.textContent = `${currentChunks().length} active chunk${currentChunks().length === 1 ? '' : 's'} remain inside the bottle; ${app.archive.chunks.filter((chunk) => chunk.destroyed).length} chunk${app.archive.chunks.filter((chunk) => chunk.destroyed).length === 1 ? '' : 's'} have been pruned.`;
+      const destroyedCount = app.archive.chunks.filter((chunk) => chunk.destroyed).length;
+      refs.bottleCaption.textContent = imageArchive
+        ? `${currentChunks().length} live image strip${currentChunks().length === 1 ? '' : 's'} remain inside the bottle; ${destroyedCount} strip${destroyedCount === 1 ? '' : 's'} have been pruned.`
+        : `${currentChunks().length} active chunk${currentChunks().length === 1 ? '' : 's'} remain inside the bottle; ${destroyedCount} chunk${destroyedCount === 1 ? '' : 's'} have been pruned.`;
     }
 
     function renderBottlePanel() {
       refs.bottleSvg.innerHTML = renderBottleSvg();
 
       if (!app.archive) {
-        refs.thresholdWrap.innerHTML = '<div class="empty-state">Seal a file to see the threshold meter and keep-set overlay.</div>';
+        refs.thresholdWrap.innerHTML = `<div class="empty-state">${app.draft.sourceMode === 'image' ? 'Seal a sample or uploaded image to see the threshold meter and image-strip keep-set overlay.' : 'Seal a file to see the threshold meter and keep-set overlay.'}</div>`;
         refs.bottleStats.innerHTML = [
           { value: '0', label: 'Chunks' },
           { value: '0', label: 'Live capsules' },
@@ -1951,7 +2572,7 @@
       `;
 
       const stats = [
-        { value: String(app.archive.chunks.length), label: 'Chunks' },
+        { value: String(app.archive.chunks.length), label: app.archive.inputKind === 'image' ? 'Strips' : 'Chunks' },
         { value: String(currentChunks().length), label: 'Live capsules' },
         { value: thresholdDelta, label: 'Threshold margin' }
       ];
@@ -1967,7 +2588,9 @@
     function renderSelectionPanel() {
       if (!app.archive) {
         refs.selectionSummary.className = 'note-box';
-        refs.selectionSummary.textContent = 'Seal a file first. Then click chunk rows, archive segments, or bottle slices to choose the keep set.';
+        refs.selectionSummary.textContent = app.draft.sourceMode === 'image'
+          ? 'Seal an image first. Then click strip rows, archive segments, or bottle slices to choose the keep set.'
+          : 'Seal a file first. Then click chunk rows, archive segments, or bottle slices to choose the keep set.';
         refs.chunks.innerHTML = '<div class="empty-state">No chunks available yet.</div>';
         return;
       }
@@ -1975,40 +2598,49 @@
       const keepBytes = selectedKeepBytes();
       const remaining = remainingBytes();
       const decryptAllowed = remaining <= app.archive.thresholdBytes;
+      const imageArchive = app.archive.inputKind === 'image';
+      const keepRows = imageArchive ? app.archive.chunks.filter((chunk) => !chunk.destroyed && chunk.keep).reduce((sum, chunk) => sum + chunk.rowCount, 0) : 0;
+      const remainingRows = imageArchive ? currentChunks().reduce((sum, chunk) => sum + chunk.rowCount, 0) : 0;
+      const keepSummary = imageArchive ? `${formatBytes(keepBytes)} across ${keepRows} row${keepRows === 1 ? '' : 's'}` : formatBytes(keepBytes);
+      const remainingSummary = imageArchive ? `${formatBytes(remaining)} across ${remainingRows} row${remainingRows === 1 ? '' : 's'}` : formatBytes(remaining);
+
       if (app.phase === 'sealed') {
         refs.selectionSummary.className = keepBytes <= app.archive.thresholdBytes ? 'note-box' : 'warning-box';
         refs.selectionSummary.textContent = keepBytes <= app.archive.thresholdBytes
-          ? `Keep set currently covers ${formatBytes(keepBytes)}. You can prune any non-selected chunks.`
-          : `Keep set currently covers ${formatBytes(keepBytes)}, which exceeds the threshold of ${formatBytes(app.archive.thresholdBytes)}. Prune stays disabled until the keep set fits.`;
+          ? `Keep set currently covers ${keepSummary}. You can prune any non-selected ${imageArchive ? 'strips' : 'chunks'}.`
+          : `Keep set currently covers ${keepSummary}, which exceeds the threshold of ${formatBytes(app.archive.thresholdBytes)}. Prune stays disabled until the keep set fits.`;
       } else if (app.phase === 'pruning') {
         refs.selectionSummary.className = 'warning-box';
-        refs.selectionSummary.textContent = 'Prune in progress: the browser is deleting simulated capsules for all non-selected chunks.';
+        refs.selectionSummary.textContent = imageArchive
+          ? 'Prune in progress: the browser is deleting simulated capsules for all non-selected image strips.'
+          : 'Prune in progress: the browser is deleting simulated capsules for all non-selected chunks.';
       } else if (decryptAllowed) {
         refs.selectionSummary.className = 'success-box';
-        refs.selectionSummary.textContent = `Residual archive is ${formatBytes(remaining)} and can be decrypted in this weak-model demo.`;
+        refs.selectionSummary.textContent = `Residual archive is ${remainingSummary} and can be decrypted in this weak-model demo.`;
       } else {
         refs.selectionSummary.className = 'warning-box';
-        refs.selectionSummary.textContent = `Residual archive is still ${formatBytes(remaining)}, above the threshold of ${formatBytes(app.archive.thresholdBytes)}.`;
+        refs.selectionSummary.textContent = `Residual archive is still ${remainingSummary}, above the threshold of ${formatBytes(app.archive.thresholdBytes)}.`;
       }
 
       const decryptAllowedNow = remaining <= app.archive.thresholdBytes;
       refs.chunks.innerHTML = app.archive.chunks.length === 0
         ? '<div class="empty-state">This archive contains no chunks.</div>'
         : app.archive.chunks.map((chunk) => {
-          const state = describeChunkState(chunk, decryptAllowedNow);
-          const buttonDisabled = !canToggleKeep() || chunk.destroyed;
-          return `
-            <button type="button" class="chunk-item ${state.tone}" data-chunk-id="${escapeHtml(chunk.id)}" ${buttonDisabled ? 'disabled' : ''} aria-pressed="${chunk.keep ? 'true' : 'false'}">
-              <span class="chunk-dot"></span>
-              <span class="chunk-info">
-                <span class="chunk-idx">Chunk ${escapeHtml(chunk.id)}</span>
-                <span class="chunk-bytes">${formatBytes(chunk.plaintextSize)}</span>
-                <span class="chunk-status">${escapeHtml(state.stage)} · ${escapeHtml(state.decryptability)}</span>
-              </span>
-              <span class="chunk-capsule">${escapeHtml(state.capsule)}</span>
-            </button>
-          `;
-        }).join('');
+            const state = describeChunkState(chunk, decryptAllowedNow);
+            const buttonDisabled = !canToggleKeep() || chunk.destroyed;
+            const rowDetail = chunkRowLabel(chunk);
+            return `
+              <button type="button" class="chunk-item ${state.tone}" data-chunk-id="${escapeHtml(chunk.id)}" ${buttonDisabled ? 'disabled' : ''} aria-pressed="${chunk.keep ? 'true' : 'false'}">
+                <span class="chunk-dot"></span>
+                <span class="chunk-info">
+                  <span class="chunk-idx">Chunk ${escapeHtml(chunk.id)}</span>
+                  <span class="chunk-bytes">${formatBytes(chunk.plaintextSize)}</span>
+                  <span class="chunk-status">${escapeHtml(state.stage)} · ${escapeHtml(state.decryptability)}${rowDetail ? ` · ${escapeHtml(rowDetail)}` : ''}</span>
+                </span>
+                <span class="chunk-capsule">${escapeHtml(state.capsule)}</span>
+              </button>
+            `;
+          }).join('');
     }
 
     function renderFlowDiagram() {
@@ -2140,20 +2772,58 @@
     function renderArchiveMap() {
       if (!app.archive) {
         refs.archiveSummary.className = 'note-box';
-        refs.archiveSummary.textContent = 'Seal a file to inspect the archive byte map and click individual segments to build the keep set.';
+        refs.archiveSummary.textContent = app.draft.sourceMode === 'image'
+          ? 'Seal an image to inspect the row-strip map and click individual segments to build the keep set.'
+          : 'Seal a file to inspect the archive byte map and click individual segments to build the keep set.';
         refs.archiveMap.innerHTML = '<div class="empty-state">No archive loaded.</div>';
         return;
       }
 
       const remaining = remainingBytes();
       const decryptAllowed = remaining <= app.archive.thresholdBytes;
+      const imageArchive = app.archive.inputKind === 'image' && app.archive.image;
       refs.archiveSummary.className = decryptAllowed ? 'success-box' : 'note-box';
-      refs.archiveSummary.textContent = decryptAllowed
-        ? 'Each surviving segment in the strip is now decryptable in the weak browser demo. Pruned segments remain visible for state history.'
-        : 'Click live segments during the sealed phase to choose the keep set. Their relative widths still reflect plaintext size.';
+      refs.archiveSummary.textContent = imageArchive
+        ? (decryptAllowed
+            ? 'Each surviving strip in the image stack is now decryptable in the weak browser demo. Pruned strips stay visible as dark gaps.'
+            : 'Click live strips during the sealed phase to choose which image rows survive prune. The stack preserves top-to-bottom row order.')
+        : (decryptAllowed
+            ? 'Each surviving segment in the strip is now decryptable in the weak browser demo. Pruned segments remain visible for state history.'
+            : 'Click live segments during the sealed phase to choose the keep set. Their relative widths still reflect plaintext size.');
 
       if (app.archive.chunks.length === 0) {
         refs.archiveMap.innerHTML = '<div class="empty-state">This sealed archive contains no chunks.</div>';
+        return;
+      }
+
+      if (imageArchive) {
+        refs.archiveMap.innerHTML = `
+          <div class="archive-image-strip">
+            ${app.archive.chunks.map((chunk) => {
+              const state = describeChunkState(chunk, decryptAllowed);
+              const interactive = canToggleKeep() && !chunk.destroyed;
+              const metrics = imageSliceMetrics(chunk, app.archive.image.height, IMAGE_SLICE_PREVIEW_HEIGHT);
+              return `
+                <button type="button" class="archive-segment archive-image-segment segment-${state.tone} ${chunk.keep ? 'selected' : ''} ${interactive ? 'segment-interactive' : ''}" ${interactive ? `data-chunk-id="${escapeHtml(chunk.id)}"` : 'disabled'}>
+                  <div class="archive-image-window" style="height:${metrics.windowHeight}px;">
+                    <img src="${escapeHtml(app.archive.image.previewUrl)}" alt="" style="height:${IMAGE_SLICE_PREVIEW_HEIGHT}px; transform: translateY(-${metrics.top.toFixed(1)}px); opacity:${chunk.destroyed ? '0.24' : '1'};">
+                  </div>
+                  <div class="archive-image-meta">
+                    <strong>${escapeHtml(chunk.id)}</strong>
+                    <small>${escapeHtml(chunkRowLabel(chunk))}</small>
+                    <small>${formatBytes(chunk.plaintextSize)} · ${escapeHtml(state.stage)}</small>
+                  </div>
+                </button>
+              `;
+            }).join('')}
+          </div>
+          <div class="legend">
+            <span class="legend-item"><span class="legend-swatch swatch-available"></span>sealed / removable</span>
+            <span class="legend-item"><span class="legend-swatch swatch-keep"></span>selected keep</span>
+            <span class="legend-item"><span class="legend-swatch swatch-decryptable"></span>residual decryptable</span>
+            <span class="legend-item"><span class="legend-swatch swatch-pruned"></span>pruned strip</span>
+          </div>
+        `;
         return;
       }
 
@@ -2182,7 +2852,7 @@
 
     function renderChunkVisualization() {
       if (!app.archive) {
-        refs.chunkVisualization.innerHTML = '<div class="empty-state">Seal a file to inspect per-chunk capsule state.</div>';
+        refs.chunkVisualization.innerHTML = `<div class="empty-state">${app.draft.sourceMode === 'image' ? 'Seal an image to inspect per-strip capsule state.' : 'Seal a file to inspect per-chunk capsule state.'}</div>`;
         return;
       }
 
@@ -2194,8 +2864,23 @@
 
       refs.chunkVisualization.innerHTML = app.archive.chunks.map((chunk) => {
         const state = describeChunkState(chunk, decryptAllowed);
+        const imagePreview = app.archive.inputKind === 'image' && app.archive.image
+          ? (() => {
+              const metrics = imageSliceMetrics(chunk, app.archive.image.height, IMAGE_SLICE_PREVIEW_HEIGHT, 52);
+              const previewHeight = Math.min(96, Math.max(52, metrics.windowHeight));
+              return `
+                <div class="chunk-card-image">
+                  <div class="chunk-card-image-window" style="height:${previewHeight}px;">
+                    <img src="${escapeHtml(app.archive.image.previewUrl)}" alt="" style="height:${IMAGE_SLICE_PREVIEW_HEIGHT}px; transform: translateY(-${metrics.top.toFixed(1)}px); opacity:${chunk.destroyed ? '0.22' : '1'};">
+                  </div>
+                  <div class="muted chunk-row-label">${escapeHtml(chunkRowLabel(chunk))}</div>
+                </div>
+              `;
+            })()
+          : '';
         return `
           <article class="chunk-card ${state.tone}">
+            ${imagePreview}
             <div class="chunk-card-header">
               <div>
                 <h3>Chunk ${escapeHtml(chunk.id)}</h3>
@@ -2281,27 +2966,53 @@
     }
 
     async function sealArchive() {
-      const file = refs.fileInput.files[0];
       const thresholdBytes = Number(refs.thresholdInput.value);
-      const chunkSizeBytes = Number(refs.chunkSizeInput.value);
+      let chunkSizeBytes = Number(refs.chunkSizeInput.value);
+      const draft = currentDraftSource();
 
-      if (!file) {
-        throw new Error('Choose a file first.');
+      if (!draft) {
+        throw new Error(app.draft.sourceMode === 'image' ? 'Load a sample image or upload an image first.' : 'Choose a file first.');
       }
       if (!Number.isFinite(thresholdBytes) || thresholdBytes <= 0) {
         throw new Error('Threshold must be a positive integer.');
       }
-      if (!Number.isFinite(chunkSizeBytes) || chunkSizeBytes < 1024) {
+      if (!Number.isFinite(chunkSizeBytes) || chunkSizeBytes <= 0) {
+        throw new Error('Chunk size must be a positive integer.');
+      }
+      if (draft.kind === 'file' && chunkSizeBytes < 1024) {
         throw new Error('Chunk size must be at least 1024 bytes.');
       }
 
+      let inputName;
+      let fileBytes;
+      let inputKind = draft.kind;
+      let imageMeta = null;
+
+      if (draft.kind === 'image') {
+        const imageAsset = draft.image;
+        chunkSizeBytes = normalizeImageChunkSize(chunkSizeBytes, imageAsset.rowBytes);
+        refs.chunkSizeInput.value = String(chunkSizeBytes);
+        inputName = imageAsset.name;
+        fileBytes = imageAsset.bytes.slice();
+        imageMeta = {
+          width: imageAsset.width,
+          height: imageAsset.height,
+          rowBytes: imageAsset.rowBytes,
+          sourceLabel: imageAsset.sourceLabel,
+          previewUrl: imageAsset.previewUrl
+        };
+      } else {
+        inputName = draft.file.name;
+        fileBytes = new Uint8Array(await draft.file.arrayBuffer());
+      }
+
       app.phase = 'sealing';
-      setOutput('info', 'Sealing file into browser-memory chunk capsules...');
+      setOutput('info', draft.kind === 'image'
+        ? 'Sealing image rows into browser-memory chunk capsules...'
+        : 'Sealing file into browser-memory chunk capsules...');
       updateUi();
 
-      const fileBytes = new Uint8Array(await file.arrayBuffer());
       const chunks = [];
-
       for (let offset = 0, index = 0; offset < fileBytes.length; offset += chunkSizeBytes, index += 1) {
         const chunkId = String(index).padStart(8, '0');
         const plaintext = fileBytes.slice(offset, Math.min(offset + chunkSizeBytes, fileBytes.length));
@@ -2312,6 +3023,7 @@
         chunks.push({
           id: chunkId,
           index,
+          offset,
           plaintextSize: plaintext.byteLength,
           iv: encrypted.iv,
           ciphertext: encrypted.ciphertext,
@@ -2319,14 +3031,20 @@
           keyCapsule: keyBytes,
           destroyed: false,
           keep: false,
-          pruning: false
+          pruning: false,
+          ...(imageMeta ? {
+            rowStart: Math.round(offset / imageMeta.rowBytes),
+            rowCount: Math.round(plaintext.byteLength / imageMeta.rowBytes)
+          } : {})
         });
       }
 
       app.archive = {
         archiveId: crypto.randomUUID(),
         createdAt: new Date().toISOString(),
-        inputName: file.name,
+        inputName,
+        inputKind,
+        image: imageMeta,
         thresholdBytes,
         chunkSizeBytes,
         totalBytes: fileBytes.byteLength,
@@ -2338,7 +3056,9 @@
       updateUi();
       await sleep(Math.min(900, 220 + chunks.length * 55));
       app.phase = 'sealed';
-      setOutput('info', `Archive sealed: ${formatBytes(fileBytes.byteLength)} across ${chunks.length} chunk${chunks.length === 1 ? '' : 's'}. Weak-model warning still applies.`);
+      setOutput('info', draft.kind === 'image'
+        ? `Image sealed: ${imageMeta.width}×${imageMeta.height}px across ${chunks.length} row-aligned chunk${chunks.length === 1 ? '' : 's'}. Weak-model warning still applies.`
+        : `Archive sealed: ${formatBytes(fileBytes.byteLength)} across ${chunks.length} chunk${chunks.length === 1 ? '' : 's'}. Weak-model warning still applies.`);
       updateUi();
     }
 
@@ -2394,7 +3114,9 @@
       }
 
       app.phase = 'decrypting';
-      setOutput('info', 'Decrypting the residual archive inside the browser...');
+      setOutput('info', app.archive.inputKind === 'image'
+        ? 'Decrypting the residual image rows inside the browser...'
+        : 'Decrypting the residual archive inside the browser...');
       updateUi();
 
       const plaintextChunks = [];
@@ -2409,15 +3131,39 @@
           chunk.id,
           chunk.plaintextSize
         );
-        plaintextChunks.push(plaintext);
+        plaintextChunks.push({ chunk, plaintext });
       }
 
-      const totalBytes = plaintextChunks.reduce((sum, chunk) => sum + chunk.byteLength, 0);
+      if (app.archive.inputKind === 'image' && app.archive.image) {
+        const residual = new Uint8ClampedArray(app.archive.totalBytes);
+        for (let index = 0; index < residual.length; index += 4) {
+          residual[index] = 5;
+          residual[index + 1] = 18;
+          residual[index + 2] = 38;
+          residual[index + 3] = 255;
+        }
+        for (const { chunk, plaintext } of plaintextChunks) {
+          residual.set(plaintext, chunk.offset);
+        }
+
+        const residualHash = await sha256(residual);
+        const filename = app.archive.inputName.replace(/(\.[^.]+)?$/, '-residual.png');
+        const blob = await rgbaBytesToBlob(residual, app.archive.image.width, app.archive.image.height);
+        app.archive.latestResidualPreviewUrl = rgbaBytesToDataUrl(residual, app.archive.image.width, app.archive.image.height);
+        downloadBlob(blob, filename);
+        app.archive.lastAction = 'decrypted';
+        app.phase = 'decrypted';
+        setOutput('success', `Residual image download started: ${filename} (${app.archive.image.width}×${app.archive.image.height}px, SHA-256 ${residualHash.slice(0, 16)}…). Weak-model note: browser state can still be copied or rolled back.`);
+        updateUi();
+        return;
+      }
+
+      const totalBytes = plaintextChunks.reduce((sum, entry) => sum + entry.plaintext.byteLength, 0);
       const merged = new Uint8Array(totalBytes);
       let offset = 0;
-      for (const chunk of plaintextChunks) {
-        merged.set(chunk, offset);
-        offset += chunk.byteLength;
+      for (const entry of plaintextChunks) {
+        merged.set(entry.plaintext, offset);
+        offset += entry.plaintext.byteLength;
       }
 
       const residualHash = await sha256(merged);
@@ -2442,8 +3188,12 @@
     function resetDemo() {
       app.archive = null;
       app.phase = 'idle';
+      app.draft.imageAsset = null;
       refs.fileInput.value = '';
-      setOutput('idle', 'Demo reset. Choose a file to seal a fresh weak-model archive.');
+      refs.imageInput.value = '';
+      setOutput('idle', app.draft.sourceMode === 'image'
+        ? 'Demo reset. Load a sample or upload an image to seal a fresh weak-model archive.'
+        : 'Demo reset. Choose a file to seal a fresh weak-model archive.');
       updateUi();
     }
 
@@ -2472,6 +3222,46 @@
       updateUi();
       alert(message);
     }
+
+    refs.modeFileButton.addEventListener('click', () => {
+      app.draft.sourceMode = 'file';
+      updateUi();
+    });
+
+    refs.modeImageButton.addEventListener('click', () => {
+      app.draft.sourceMode = 'image';
+      updateUi();
+    });
+
+    refs.sampleImageButton.addEventListener('click', () => {
+      try {
+        app.draft.imageAsset = createSampleImageAsset();
+        applySuggestedImageParameters(app.draft.imageAsset);
+        updateUi();
+      } catch (error) {
+        handleError(error);
+      }
+    });
+
+    refs.imageUploadButton.addEventListener('click', () => {
+      refs.imageInput.click();
+    });
+
+    refs.imageInput.addEventListener('change', async () => {
+      try {
+        const file = refs.imageInput.files[0];
+        if (!file) {
+          return;
+        }
+        app.draft.imageAsset = await createImageAssetFromFile(file);
+        applySuggestedImageParameters(app.draft.imageAsset);
+        refs.imageInput.value = '';
+        updateUi();
+      } catch (error) {
+        refs.imageInput.value = '';
+        handleError(error);
+      }
+    });
 
     refs.fileInput.addEventListener('change', () => {
       updateUi();
