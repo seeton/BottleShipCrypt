@@ -1016,28 +1016,162 @@
       border-radius: 999px;
     }
 
-    @media (max-width: 1260px) {
-      .main-grid {
-        grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+    .top-ribbon {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.95fr);
+      gap: 16px;
+    }
+
+    .warning-strip {
+      gap: 18px;
+    }
+
+    .warning-strip p {
+      margin: 0;
+      color: var(--text);
+    }
+
+    .warning-box strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.98rem;
+    }
+
+    .redesigned-main {
+      grid-template-columns: minmax(290px, 320px) minmax(420px, 1.12fr) minmax(320px, 360px);
+      align-items: stretch;
+    }
+
+    .control-panel .panel-body,
+    .manifest-panel .panel-body,
+    .analytics-grid .panel-body {
+      min-height: 0;
+    }
+
+    .file-well {
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(113, 183, 223, 0.16);
+      background: linear-gradient(180deg, rgba(8, 20, 40, 0.86), rgba(5, 13, 26, 0.82));
+      box-shadow: inset 0 1px 0 rgba(200, 220, 255, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .config-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .control-microcopy {
+      line-height: 1.6;
+    }
+
+    .bottle-panel .panel-body {
+      gap: 18px;
+    }
+
+    .bottle-stage {
+      align-items: stretch;
+      justify-content: flex-start;
+    }
+
+    .phase-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+    }
+
+    .phase-stage .phase-lead {
+      max-width: 640px;
+    }
+
+    .phase-stage .bottle-svg-shell,
+    .phase-stage .threshold-wrap,
+    .phase-stage .stats-row {
+      width: min(100%, 480px);
+      margin-inline: auto;
+    }
+
+    .subpanel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(113, 183, 223, 0.12);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .subpanel-head {
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .archive-map-host {
+      min-height: 140px;
+    }
+
+    .manifest-panel-body {
+      gap: 14px;
+    }
+
+    .manifest-panel .chunk-list {
+      flex: 1;
+      min-height: 230px;
+      max-height: 360px;
+    }
+
+    .manifest-panel #manifestView {
+      max-height: 260px;
+    }
+
+    .analytics-grid {
+      grid-template-columns: minmax(300px, 0.92fr) minmax(0, 1.08fr);
+    }
+
+    .analytics-grid #chunkVisualization {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .output-bar {
+      background: linear-gradient(180deg, rgba(11, 28, 53, 0.88), rgba(6, 15, 31, 0.82));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    @media (max-width: 1360px) {
+      .top-ribbon,
+      .analytics-grid {
+        grid-template-columns: 1fr;
       }
 
-      .main-grid > :nth-child(3) {
-        grid-column: 1 / -1;
+      .redesigned-main {
+        grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
       }
 
-      .lower-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .lower-grid > :last-child {
+      .redesigned-main > :nth-child(3) {
         grid-column: 1 / -1;
       }
     }
 
     @media (max-width: 900px) {
-      .hero-grid,
-      .main-grid,
-      .lower-grid {
+      .top-ribbon,
+      .redesigned-main,
+      .analytics-grid,
+      .comparison-grid,
+      .config-grid {
         grid-template-columns: 1fr;
       }
 
@@ -1077,10 +1211,10 @@
       <div id="phaseBadge" class="phase-badge phase-idle">Idle</div>
     </header>
 
-    <section class="hero-grid">
-      <section class="panel">
+    <section class="top-ribbon">
+      <section class="panel intro-panel">
         <div class="panel-header">⚠ Weak-model warning</div>
-        <div class="panel-body hero-copy">
+        <div class="panel-body hero-copy warning-strip">
           <div class="warning-box">
             <strong>Unsafe for real secrets: this is a weak-model visualization only.</strong>
             The browser cannot enforce irreversible capsule destruction, rollback-resistant state, trusted key custody, or copy resistance.
@@ -1114,7 +1248,7 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel status-panel">
         <div class="panel-header">🧭 Voyage status</div>
         <div class="panel-body">
           <div id="statusCards" class="status-grid"></div>
@@ -1123,24 +1257,28 @@
       </section>
     </section>
 
-    <section class="main-grid">
-      <section class="panel">
-        <div class="panel-header">⚗ Seal & configure</div>
+    <section class="main-grid redesigned-main">
+      <section class="panel control-panel">
+        <div class="panel-header">⚗ Seal &amp; configure</div>
         <div class="panel-body">
-          <div class="field">
-            <label for="fileInput">Input file</label>
-            <input id="fileInput" type="file">
+          <div class="file-well">
+            <div class="field">
+              <label for="fileInput">Input file</label>
+              <input id="fileInput" type="file">
+            </div>
             <div id="fileMeta" class="file-meta">No file chosen.</div>
           </div>
 
-          <div class="field">
-            <label for="thresholdInput">Threshold bytes</label>
-            <input id="thresholdInput" type="number" value="1048576" min="1" step="1">
-          </div>
+          <div class="config-grid">
+            <div class="field">
+              <label for="thresholdInput">Threshold bytes</label>
+              <input id="thresholdInput" type="number" value="1048576" min="1" step="1">
+            </div>
 
-          <div class="field">
-            <label for="chunkSizeInput">Chunk size bytes</label>
-            <input id="chunkSizeInput" type="number" value="262144" min="1024" step="1">
+            <div class="field">
+              <label for="chunkSizeInput">Chunk size bytes</label>
+              <input id="chunkSizeInput" type="number" value="262144" min="1024" step="1">
+            </div>
           </div>
 
           <div class="note-box">
@@ -1153,24 +1291,32 @@
             <button id="resetButton" class="btn btn-ghost">Reset demo</button>
           </div>
 
-          <div class="subtle-text">Draft input changes apply the next time you seal. Reset clears the current archive and the selected file.</div>
+          <div class="subtle-text control-microcopy">Draft input changes apply the next time you seal. Reset clears the current archive and the selected file.</div>
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel bottle-panel">
         <div class="panel-header">🫙 BottleShip state vessel</div>
         <div class="panel-body bottle-stage">
-          <div id="phaseLead" class="phase-lead"></div>
-          <div id="bottleSvg" class="bottle-svg-shell"></div>
-          <div id="bottleCaption" class="bottle-caption"></div>
-          <div id="thresholdWrap" class="threshold-wrap"></div>
-          <div id="bottleStats" class="stats-row"></div>
+          <div class="phase-stage">
+            <div id="phaseLead" class="phase-lead"></div>
+            <div id="bottleSvg" class="bottle-svg-shell"></div>
+            <div id="bottleCaption" class="bottle-caption"></div>
+            <div id="thresholdWrap" class="threshold-wrap"></div>
+            <div id="bottleStats" class="stats-row"></div>
+          </div>
+
+          <div class="subpanel map-subpanel">
+            <div class="subpanel-head">🗺 Residual archive byte map</div>
+            <div id="archiveSummary" class="note-box"></div>
+            <div id="archiveMap" class="archive-map-host"></div>
+          </div>
         </div>
       </section>
 
-      <section class="panel">
-        <div class="panel-header">📜 Keep set & chunk manifest</div>
-        <div class="panel-body">
+      <section class="panel manifest-panel">
+        <div class="panel-header">📜 Keep set &amp; chunk manifest</div>
+        <div class="panel-body manifest-panel-body">
           <div id="selectionSummary" class="note-box"></div>
 
           <div class="select-all-row">
@@ -1185,11 +1331,17 @@
             <button id="decryptButton" class="btn btn-sea">Decrypt remaining chunks</button>
             <button id="manifestButton" class="btn btn-ghost">Export manifest JSON</button>
           </div>
+
+          <div class="subpanel mini-subpanel">
+            <div class="subpanel-head">📦 Manifest preview</div>
+            <div class="muted">Manifest data stays descriptive weak-model metadata only. Exporting it does not turn the browser into a trusted component.</div>
+            <pre id="manifestView">{}</pre>
+          </div>
         </div>
       </section>
     </section>
 
-    <section class="lower-grid">
+    <section class="lower-grid analytics-grid">
       <section class="panel">
         <div class="panel-header">🧭 State flow</div>
         <div class="panel-body">
@@ -1198,27 +1350,11 @@
       </section>
 
       <section class="panel">
-        <div class="panel-header">🗺 Archive byte map</div>
+        <div class="panel-header">🔎 Chunk + capsule state</div>
         <div class="panel-body">
-          <div id="archiveSummary" class="note-box"></div>
-          <div id="archiveMap"></div>
+          <div id="chunkVisualization" class="chunk-card-grid"></div>
         </div>
       </section>
-
-      <section class="panel">
-        <div class="panel-header">📦 Manifest preview</div>
-        <div class="panel-body">
-          <div class="note-box">Manifest data stays weak-model metadata only. Exporting it does not turn the browser into a trusted component.</div>
-          <pre id="manifestView">{}</pre>
-        </div>
-      </section>
-    </section>
-
-    <section class="panel">
-      <div class="panel-header">🔎 Chunk + capsule state</div>
-      <div class="panel-body">
-        <div id="chunkVisualization" class="chunk-card-grid"></div>
-      </div>
     </section>
 
     <section class="output-bar">
